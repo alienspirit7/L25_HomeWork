@@ -75,11 +75,28 @@ class Referee:
         
         logging.info(f"Match {match_id} complete: Winner={winner_id}, Number={drawn_number}")
         
-        # Step 5: Notify players and league manager
+        # Step 5: Notify players
         await self._notify_game_over(player_A_id, player_A_endpoint, match_id, round_id, league_id, 
                                      winner_id, drawn_number, {player_A_id: choice_A, player_B_id: choice_B}, reason)
         await self._notify_game_over(player_B_id, player_B_endpoint, match_id, round_id, league_id,
                                      winner_id, drawn_number, {player_A_id: choice_A, player_B_id: choice_B}, reason)
+        
+        # Step 6: Report results to league manager
+        league_manager_endpoint = args.get('league_manager_endpoint', 'http://localhost:8000/mcp')
+        try:
+            await self.mcp_client.call_tool(league_manager_endpoint, "report_match_result", {
+                "match_id": match_id,
+                "winner": winner_id,
+                "score": score,
+                "details": {
+                    "drawn_number": drawn_number,
+                    "choices": {player_A_id: choice_A, player_B_id: choice_B},
+                    "reason": reason
+                }
+            })
+            logging.info(f"Match {match_id} result reported to league manager")
+        except Exception as e:
+            logging.error(f"Failed to report match {match_id} to league manager: {e}")
         
         return {"status": "OK", "winner": winner_id, "score": score}
     

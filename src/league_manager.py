@@ -28,6 +28,8 @@ class LeagueManager:
         self.schedule = []
         self.results = {}
         self.registration_closed = False
+        self.completed_matches = set()
+        self.expected_matches = 0
         self.mcp_server = MCPServer("LeagueManager")
         self.mcp_client = MCPClient()
         self.referee_endpoints = [
@@ -75,7 +77,8 @@ class LeagueManager:
             "score": args['score'],
             "details": args.get('details', {})
         }
-        logging.info(f"Match result recorded: {match_id}")
+        self.completed_matches.add(match_id)
+        logging.info(f"Match result recorded: {match_id} ({len(self.completed_matches)}/{self.expected_matches})")
         self._save_state()
         return {"status": "OK"}
     
@@ -105,7 +108,8 @@ class LeagueManager:
         logging.info(f"Registration closed. Players: {player_ids}")
         
         self.schedule = generate_round_robin_schedule(player_ids)
-        logging.info(f"Schedule created: {len(self.schedule)} matches")
+        self.expected_matches = len(self.schedule)
+        logging.info(f"Schedule created: {self.expected_matches} matches")
         
         for player_A, player_B, round_id, match_num in self.schedule:
             match_id = f"R{round_id}M{match_num}"
@@ -119,14 +123,50 @@ class LeagueManager:
                 "player_B_id": player_B,
                 "player_A_endpoint": self.players[player_A]['endpoint'],
                 "player_B_endpoint": self.players[player_B]['endpoint'],
-                "league_id": self.league_id
+                "league_id": self.league_id,
+                "league_manager_endpoint": f"http://{self.config['agents']['league_manager']['host']}:{self.config['agents']['league_manager']['port']}/mcp"
             })
         
+        # Wait for all matches to complete
+        logging.info("Waiting for all matches to complete...")
+        while len(self.completed_matches) < self.expected_matches:
+            await asyncio.sleep(1)
+        
+        logging.info("All matches completed!")
+        
+        # Calculate final standings
         standings = calculate_standings(self.results)
-        logging.info(f"Final standings: {standings}")
-        print("\n=== FINAL STANDINGS ===")
+        
+        # Display comprehensive results
+        print("\n" + "="*60)
+        print("  LEAGUE COMPLETE - FINAL RESULTS")
+        print("="*60)
+        print(f"\nLeague: {self.league_id}")
+        print(f"Total Matches Played: {self.expected_matches}")
+        print(f"Total Players: {len(player_ids)}\n")
+        
+        print("-"*60)
+        print("FINAL STANDINGS")
+        print("-"*60)
+        print(f"{'Rank':<6} {'Player':<12} {'Played':<8} {'W':<4} {'D':<4} {'L':<4} {'Points':<8}")
+        print("-"*60)
+        
         for entry in standings:
-            print(f"{entry['rank']}. {entry['player_id']} - {entry['points']} pts")
+            print(f"{entry['rank']:<6} {entry['player_id']:<12} "
+                  f"{entry['played']:<8} {entry['wins']:<4} {entry['draws']:<4} "
+                  f"{entry['losses']:<4} {entry['points']:<8}")
+        
+        # Announce the winner
+        if standings:
+            winner = standings[0]
+            print("\n" + "="*60)
+            print("  🏆 WINNER ANNOUNCEMENT 🏆")
+            print("="*60)
+            print(f"\nCongratulations to {winner['player_id']} - {self.players.get(winner['player_id'], {}).get('display_name', 'Unknown')}!")
+            print(f"Final Score: {winner['points']} points ({winner['wins']} wins, {winner['draws']} draws, {winner['losses']} losses)")
+            print("\n" + "="*60 + "\n")
+        
+        logging.info(f"Winner: {winner['player_id']} with {winner['points']} points")
 
 
 async def main():
