@@ -1,7 +1,9 @@
 """Helper utility functions."""
 import uuid
+import logging
 from datetime import datetime, timezone
 from typing import List, Dict, Tuple
+from pathlib import Path
 
 
 def get_iso_timestamp() -> str:
@@ -99,3 +101,53 @@ def calculate_standings(results: Dict[str, Dict]) -> List[Dict]:
 def determine_parity(number: int) -> str:
     """Determine if number is even or odd."""
     return "even" if number % 2 == 0 else "odd"
+
+
+def setup_logging(log_dir: str = "logs", log_file: str = None, level: str = "INFO"):
+    """
+    Configure logging to both console and file.
+    
+    Args:
+        log_dir: Directory to store log files (default: 'logs')
+        log_file: Name of log file (default: auto-generated based on timestamp and caller)
+        level: Logging level (default: 'INFO')
+    """
+    # Create logs directory if it doesn't exist
+    log_path = Path(log_dir)
+    log_path.mkdir(exist_ok=True)
+    
+    # Generate log file name if not provided
+    if log_file is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = f"{timestamp}.log"
+    
+    log_file_path = log_path / log_file
+    
+    # Set logging level
+    log_level = getattr(logging, level.upper(), logging.INFO)
+    
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    
+    # Clear existing handlers to avoid duplicates
+    root_logger.handlers.clear()
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+    
+    # File handler
+    file_handler = logging.FileHandler(log_file_path, mode='a', encoding='utf-8')
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
+    root_logger.addHandler(file_handler)
+    
+    logging.info(f"Logging configured: Console + {log_file_path}")
+    
+    return str(log_file_path)

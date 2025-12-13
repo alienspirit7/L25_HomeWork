@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).parent))
 
 from utils.mcp_server import MCPServer
 from utils.mcp_client import MCPClient
-from utils.helpers import get_iso_timestamp
+from utils.helpers import get_iso_timestamp, setup_logging
 from utils.schemas import PlayerMeta
 import uvicorn
 
@@ -165,7 +165,12 @@ async def main():
     parser.add_argument("--league", default="http://localhost:8000/mcp")
     args = parser.parse_args()
     
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    # Setup logging with file output
+    setup_logging(
+        log_dir='logs',
+        log_file=f'player_{args.name.replace(" ", "_")}_{args.port}.log',
+        level='INFO'
+    )
     
     player = PlayerAgent(args.port, args.strategy, args.name)
     

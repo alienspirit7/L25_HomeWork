@@ -8,7 +8,7 @@ sys.path.append(str(Path(__file__).parent))
 
 from utils.mcp_server import MCPServer
 from utils.mcp_client import MCPClient
-from utils.helpers import get_iso_timestamp, generate_conversation_id
+from utils.helpers import get_iso_timestamp, generate_conversation_id, setup_logging
 from game_rules.even_odd import EvenOddRules
 import uvicorn
 
@@ -186,7 +186,12 @@ def main():
     parser.add_argument("--port", type=int, required=True)
     args = parser.parse_args()
     
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    # Setup logging with file output
+    setup_logging(
+        log_dir='logs',
+        log_file=f'referee_{args.port}.log',
+        level='INFO'
+    )
     
     referee = Referee(args.port)
     uvicorn.run(referee.mcp_server.app, host="localhost", port=args.port)

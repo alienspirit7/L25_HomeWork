@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).parent))
 
 from utils.mcp_server import MCPServer
 from utils.mcp_client import MCPClient
-from utils.helpers import generate_round_robin_schedule, calculate_standings, get_iso_timestamp
+from utils.helpers import generate_round_robin_schedule, calculate_standings, get_iso_timestamp, setup_logging
 from utils.schemas import PlayerMeta, RegistrationResponse
 import uvicorn
 
@@ -177,7 +177,13 @@ async def main():
     with open(args.config) as f:
         config = yaml.safe_load(f)
     
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    # Setup logging with file output
+    log_config = config.get('logging', {})
+    setup_logging(
+        log_dir=log_config.get('directory', 'logs'),
+        log_file='league_manager.log',
+        level=log_config.get('level', 'INFO')
+    )
     
     manager = LeagueManager(config)
     
