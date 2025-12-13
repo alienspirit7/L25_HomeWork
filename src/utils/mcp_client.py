@@ -1,6 +1,7 @@
 """MCP Client for making tool calls to other agents."""
 import httpx
 import logging
+import json
 from typing import Dict, Any, Optional
 
 
@@ -47,10 +48,17 @@ class MCPClient:
         
         try:
             self.logger.debug(f"Calling {tool_name} on {endpoint}")
+            
+            # Log outgoing JSON message
+            self.logger.info(f"[SEND → {endpoint}] {json.dumps(payload, indent=2)}")
+            
             response = await self.client.post(endpoint, json=payload)
             response.raise_for_status()
             
             result = response.json()
+            
+            # Log incoming JSON response
+            self.logger.info(f"[RECV ← {endpoint}] {json.dumps(result, indent=2)}")
             
             if "error" in result:
                 self.logger.error(f"Tool call error: {result['error']}")

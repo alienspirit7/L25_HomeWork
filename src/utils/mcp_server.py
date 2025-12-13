@@ -32,6 +32,9 @@ class MCPServer:
             params = payload.get("params", {})
             request_id = payload.get("id")
             
+            # Log incoming JSON request
+            self.logger.info(f"[RECV Request] {json.dumps(payload, indent=2)}")
+            
             self.logger.debug(f"Received: {method}")
             
             # Handle different MCP methods
@@ -44,25 +47,34 @@ class MCPServer:
                 arguments = params.get("arguments", {})
                 result = await self._handle_tool_call(tool_name, arguments)
             else:
-                return JSONResponse({
+                error_response = {
                     "jsonrpc": "2.0",
                     "error": {"code": -32601, "message": "Method not found"},
                     "id": request_id
-                })
+                }
+                self.logger.info(f"[SEND Response] {json.dumps(error_response, indent=2)}")
+                return JSONResponse(error_response)
             
-            return JSONResponse({
+            success_response = {
                 "jsonrpc": "2.0",
                 "result": result,
                 "id": request_id
-            })
+            }
+            
+            # Log outgoing JSON response
+            self.logger.info(f"[SEND Response] {json.dumps(success_response, indent=2)}")
+            
+            return JSONResponse(success_response)
         
         except Exception as e:
             self.logger.error(f"Error handling request: {e}")
-            return JSONResponse({
+            error_response = {
                 "jsonrpc": "2.0",
                 "error": {"code": -32603, "message": str(e)},
                 "id": payload.get("id")
-            })
+            }
+            self.logger.info(f"[SEND Response] {json.dumps(error_response, indent=2)}")
+            return JSONResponse(error_response)
     
     def _handle_initialize(self) -> Dict:
         """Handle MCP initialize."""
