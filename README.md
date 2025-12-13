@@ -550,6 +550,51 @@ lsof -ti:8000 | xargs kill -9
 
 ---
 
+## Recent Improvements
+
+### Final Results Display & Match Reporting (December 2025)
+
+**Issues Fixed:**
+1. League manager now properly waits for all match results before displaying final standings
+2. Referees now correctly report match results back to the league manager
+
+**Technical Changes:**
+- **League Manager (`league_manager.py`)**: Added match completion tracking with wait loop
+- **Referee (`referee.py`)**: Added result reporting to league manager after each match completes
+- **Enhanced Output**: Comprehensive final standings table with detailed statistics and winner announcement
+
+**New Output Format:**
+```
+============================================================
+  LEAGUE COMPLETE - FINAL RESULTS
+============================================================
+
+League: league_2025_even_odd
+Total Matches Played: 6
+Total Players: 4
+
+------------------------------------------------------------
+FINAL STANDINGS
+------------------------------------------------------------
+Rank   Player       Played   W    D    L    Points  
+------------------------------------------------------------
+1      P01          3        2    1    0    7       
+2      P02          3        2    0    1    6       
+3      P03          3        1    0    2    3       
+4      P04          3        0    1    2    1       
+
+============================================================
+  🏆 WINNER ANNOUNCEMENT 🏆
+============================================================
+
+Congratulations to P01 - Alpha!
+Final Score: 7 points (2 wins, 1 draws, 0 losses)
+
+============================================================
+```
+
+---
+
 ## Extending the System
 
 ### Adding a New Game Type
