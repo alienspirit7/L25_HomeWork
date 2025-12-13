@@ -35,6 +35,7 @@ class PlayerAgent:
         self.mcp_server.register_tool("handle_game_invitation", self.handle_game_invitation)
         self.mcp_server.register_tool("choose_parity", self.choose_parity)
         self.mcp_server.register_tool("notify_match_result", self.notify_match_result)
+        self.mcp_server.register_tool("notify_standings", self.notify_standings)
     
     async def handle_game_invitation(self, args: dict) -> dict:
         """Respond to game invitation."""
@@ -104,6 +105,34 @@ class PlayerAgent:
         winner = game_result.get('winner_player_id')
         status = "WON" if winner == self.player_id else ("DREW" if not winner else "LOST")
         logging.info(f"Match {match_id}: {status}")
+        
+        return {"status": "ACK"}
+    
+    async def notify_standings(self, args: dict) -> dict:
+        """Receive round standings notification from league manager."""
+        round_id = args.get('round_id')
+        total_rounds = args.get('total_rounds')
+        standings = args.get('standings', [])
+        
+        logging.info(f"\n{'='*60}")
+        logging.info(f"STANDINGS AFTER ROUND {round_id}/{total_rounds}")
+        logging.info(f"{'='*60}")
+        logging.info(f"{'Rank':<6} {'Player':<12} {'Played':<8} {'W':<4} {'D':<4} {'L':<4} {'Points':<8}")
+        logging.info(f"{'-'*60}")
+        
+        for entry in standings:
+            logging.info(
+                f"{entry['rank']:<6} {entry['player_id']:<12} "
+                f"{entry['played']:<8} {entry['wins']:<4} {entry['draws']:<4} "
+                f"{entry['losses']:<4} {entry['points']:<8}"
+            )
+        
+        # Highlight own position
+        own_standing = next((s for s in standings if s['player_id'] == self.player_id), None)
+        if own_standing:
+            logging.info(f"\nMy position: #{own_standing['rank']} with {own_standing['points']} points")
+        
+        logging.info(f"{'='*60}\n")
         
         return {"status": "ACK"}
     

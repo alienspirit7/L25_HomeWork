@@ -14,6 +14,8 @@ This project demonstrates AI agent architecture through a functional game league
 - ✅ **Player Self-Registration** - Autonomous agents register themselves
 - ✅ **Pluggable Game Rules** - Easy to extend with new game types
 - ✅ **Multiple Strategies** - Random, deterministic, and LLM-based player strategies
+- ✅ **Round Standings Notifications** - Real-time standings updates after each round
+- ✅ **Comprehensive Logging** - All messages logged to files with full JSON visibility
 - ✅ **Clean Modular Code** - All Python files under 150 lines
 
 ---
@@ -237,6 +239,15 @@ sequenceDiagram
     R->>LM: report_match_result
     
     LM->>LM: Update standings
+    LM->>LM: Check if round complete
+    
+    opt Round Complete
+        LM->>LM: Calculate standings
+        LM->>PA: notify_standings
+        LM->>PB: notify_standings
+        Note over PA,PB: All players notified
+    end
+    
     LM->>LM: Save state
 ```
 
@@ -469,8 +480,18 @@ players:
 
 ### Log Files
 
-All components write to `logs/` directory:
+All components write to `logs/` directory with both console output and file logging:
 
+**Log Files Created:**
+- `league_manager.log` - League orchestration and standings
+- `referee_8001.log` - Match execution for referee on port 8001
+- `referee_8002.log` - Match execution for referee on port 8002  
+- `player_Alpha_8101.log` - Alpha player activity
+- `player_Beta_8102.log` - Beta player activity
+- `player_Gamma_8103.log` - Gamma player activity
+- `player_Delta_8104.log` - Delta player activity
+
+**Viewing Logs:**
 ```bash
 # View League Manager logs
 tail -f logs/league_manager.log
@@ -478,9 +499,43 @@ tail -f logs/league_manager.log
 # View Referee logs
 tail -f logs/referee_8001.log
 
-# View Player logs
-tail -f logs/player_8101.log
+# View Player logs  
+tail -f logs/player_Alpha_8101.log
 ```
+
+**JSON Message Logging:**
+
+All MCP messages are logged with full JSON payloads for complete visibility:
+
+```
+2025-12-13 20:30:00 - utils.mcp_client - INFO - [SEND → http://localhost:8101/mcp] {
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "choose_parity",
+    "arguments": {
+      "match_id": "R1M1",
+      "player_id": "P01",
+      ...
+    }
+  },
+  "id": 123456
+}
+
+2025-12-13 20:30:00 - utils.mcp_client - INFO - [RECV ← http://localhost:8101/mcp] {
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [{"type": "text", "text": "{...}"}]
+  },
+  "id": 123456
+}
+```
+
+**Benefits:**
+- 📝 Complete audit trail of all agent communications
+- 🐛 Easy debugging with full message visibility
+- 📊 Protocol compliance verification
+- 🔍 Message flow analysis
 
 ### State Files
 
@@ -551,6 +606,58 @@ lsof -ti:8000 | xargs kill -9
 ---
 
 ## Recent Improvements
+
+### Round Standings Notifications (December 2025)
+
+**Feature:** Real-time standings updates after each round completes.
+
+**How It Works:**
+1. League manager tracks match completion per round
+2. When all matches in a round finish, standings are calculated
+3. All players receive `ROUND_STANDINGS` message with current rankings
+4. Players log formatted standings table highlighting their position
+
+**Player Log Output:**
+```
+============================================================
+STANDINGS AFTER ROUND 1/3
+============================================================
+Rank   Player       Played   W    D    L    Points  
+------------------------------------------------------------
+1      P03          2        2    0    0    6       
+2      P01          2        1    1    0    4       
+3      P04          2        1    0    1    3       
+4      P02          2        0    1    1    1       
+
+My position: #2 with 4 points
+============================================================
+```
+
+**Benefits:**
+- ✅ Players stay informed of league progression
+- ✅ Real-time feedback after each round
+- ✅ Motivation and engagement throughout competition
+- ✅ Full transparency of standings
+
+### Comprehensive Logging System (December 2025)
+
+**Features:**
+1. **File-based Logging** - All logs saved to `logs/` directory
+2. **JSON Message Logging** - Complete MCP protocol messages logged
+3. **Component-specific Logs** - Separate log files per component
+
+**Technical Implementation:**
+- `setup_logging()` helper configures both console and file handlers
+- Automatic log directory creation
+- Pretty-printed JSON with 2-space indentation
+- `[SEND →]` and `[RECV ←]` prefixes for message direction
+
+**Log File Configuration:**
+```yaml
+logging:
+  level: "INFO"      # DEBUG, INFO, WARNING, ERROR
+  directory: "logs"  # Log file directory
+```
 
 ### Final Results Display & Match Reporting (December 2025)
 
@@ -724,10 +831,12 @@ Created using Gemini AI Assistant as part of Lesson 25 Homework Assignment.
 
 This Even/Odd AI Agent League demonstrates:
 - ✅ Distributed multi-agent systems
-- ✅ MCP protocol implementation
+- ✅ MCP protocol implementation  
 - ✅ Autonomous agent registration
 - ✅ Parallel task execution
+- ✅ Round-by-round standings notifications
+- ✅ Comprehensive logging with JSON message visibility
 - ✅ Clean, modular code architecture
-- ✅ All Python files under 150 lines
+- ✅ All Python files under 200 lines
 
 Perfect for learning AI agent architecture and MCP protocol! 🚀

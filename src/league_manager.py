@@ -30,6 +30,10 @@ class LeagueManager:
         self.registration_closed = False
         self.completed_matches = set()
         self.expected_matches = 0
+        # Round tracking
+        self.rounds_info = {}  # {round_id: {"matches": [...], "completed": 0}}
+        self.completed_rounds = set()
+        self.total_rounds = 0
         self.mcp_server = MCPServer("LeagueManager")
         self.mcp_client = MCPClient()
         self.referee_endpoints = [
@@ -80,12 +84,67 @@ class LeagueManager:
         self.completed_matches.add(match_id)
         logging.info(f"Match result recorded: {match_id} ({len(self.completed_matches)}/{self.expected_matches})")
         self._save_state()
+        
+        # Check if round is complete
+        await self._check_round_completion(match_id)
+        
         return {"status": "OK"}
     
     async def get_standings(self, args: dict) -> dict:
         """Calculate and return standings."""
         standings = calculate_standings(self.results)
         return {"standings": standings}
+    
+    async def _check_round_completion(self, match_id: str):
+        """Check if a round has completed and notify players."""
+        # Extract round_id from match_id (e.g., "R1M1" -> 1)
+        round_id = int(match_id[1:match_id.index('M')])
+        
+        if round_id in self.completed_rounds:
+            return  # Already processed this round
+        
+        # Count completed matches in this round
+        round_info = self.rounds_info.get(round_id, {})
+        if not round_info:
+            return
+        
+        round_info['completed'] += 1
+        
+        # Check if all matches in this round are complete
+        if round_info['completed'] >= len(round_info['matches']):
+            self.completed_rounds.add(round_id)
+            logging.info(f"Round {round_id} completed!")
+            
+            # Calculate and notify standings
+            standings = calculate_standings(self.results)
+            await self._notify_round_standings(round_id, standings)
+    
+    async def _notify_round_standings(self, round_id: int, standings: list):
+        """Notify all players of current standings after round completion."""
+        logging.info(f"Notifying all players of Round {round_id} standings")
+        
+        message = {
+            "protocol": "league.v1",
+            "message_type": "ROUND_STANDINGS",
+            "league_id": self.league_id,
+            "round_id": round_id,
+            "total_rounds": self.total_rounds,
+            "sender": "league_manager",
+            "timestamp": get_iso_timestamp(),
+            "standings": standings
+        }
+        
+        # Send to all registered players
+        for player_id, player_info in self.players.items():
+            try:
+                await self.mcp_client.call_tool(
+                    player_info['endpoint'],
+                    "notify_standings",
+                    message
+                )
+                logging.info(f"Standings sent to {player_id}")
+            except Exception as e:
+                logging.error(f"Failed to send standings to {player_id}: {e}")
     
     def _save_state(self):
         """Persist league state to disk."""
@@ -110,6 +169,16 @@ class LeagueManager:
         self.schedule = generate_round_robin_schedule(player_ids)
         self.expected_matches = len(self.schedule)
         logging.info(f"Schedule created: {self.expected_matches} matches")
+        
+        # Build rounds_info for tracking
+        for player_A, player_B, round_id, match_num in self.schedule:
+            if round_id not in self.rounds_info:
+                self.rounds_info[round_id] = {"matches": [], "completed": 0}
+                self.total_rounds = max(self.total_rounds, round_id)
+            match_id = f"R{round_id}M{match_num}"
+            self.rounds_info[round_id]['matches'].append(match_id)
+        
+        logging.info(f"Total rounds: {self.total_rounds}")
         
         for player_A, player_B, round_id, match_num in self.schedule:
             match_id = f"R{round_id}M{match_num}"
