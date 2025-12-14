@@ -1,14 +1,53 @@
 """Helper utility functions."""
 import uuid
 import logging
+import hashlib
+import secrets
 from datetime import datetime, timezone
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 
 
+# ============================================================================
+# Error Code Constants
+# ============================================================================
+
+ERROR_CODES = {
+    "E001": "TIMEOUT_ERROR",
+    "E003": "MISSING_REQUIRED_FIELD",
+    "E004": "INVALID_PARITY_CHOICE",
+    "E005": "PLAYER_NOT_REGISTERED",
+    "E009": "CONNECTION_ERROR",
+    "E011": "AUTH_TOKEN_MISSING",
+    "E012": "AUTH_TOKEN_INVALID",
+    "E013": "REFEREE_NOT_REGISTERED",
+    "E018": "PROTOCOL_VERSION_MISMATCH",
+    "E021": "INVALID_TIMESTAMP",
+}
+
+
+# ============================================================================
+# Timestamp and ID Helpers
+# ============================================================================
+
 def get_iso_timestamp() -> str:
-    """Generate ISO-8601 timestamp with Z suffix."""
+    """Generate ISO-8601 timestamp with Z suffix (UTC)."""
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def utc_timestamp() -> str:
+    """Alias for get_iso_timestamp - returns UTC timestamp."""
+    return get_iso_timestamp()
+
+
+def validate_utc_timestamp(timestamp: str) -> bool:
+    """Validate that timestamp is in UTC format (ends with Z or +00:00)."""
+    return timestamp.endswith('Z') or timestamp.endswith('+00:00')
+
+
+def is_utc_format(timestamp: str) -> bool:
+    """Check if timestamp follows UTC format."""
+    return validate_utc_timestamp(timestamp)
 
 
 def generate_conversation_id(prefix: str = "conv") -> str:
@@ -19,6 +58,44 @@ def generate_conversation_id(prefix: str = "conv") -> str:
 def create_match_id(round_id: int, match_num: int) -> str:
     """Generate match ID (e.g., R1M1, R2M3)."""
     return f"R{round_id}M{match_num}"
+
+
+# ============================================================================
+# Authentication and Validation
+# ============================================================================
+
+def generate_auth_token(agent_type: str, agent_id: str) -> str:
+    """
+    Generate authentication token in format: tok_{agent_id}_{hash}
+    
+    Args:
+        agent_type: "player" or "referee"
+        agent_id: Agent identifier (e.g., "P01", "REF01")
+    
+    Returns:
+        Auth token string (e.g., "tok_P01_abc123def456")
+    """
+    # Generate secure random hash
+    hash_part = hashlib.sha256(secrets.token_bytes(32)).hexdigest()[:12]
+    return f"tok_{agent_id}_{hash_part}"
+
+
+def validate_sender_format(sender: str) -> bool:
+    """
+    Validate sender format: "player:P01", "referee:REF01", or "league_manager"
+    
+    Args:
+        sender: Sender identifier string
+    
+    Returns:
+        True if valid format, False otherwise
+    """
+    if sender == "league_manager":
+        return True
+    if ":" not in sender:
+        return False
+    agent_type, agent_id = sender.split(":", 1)
+    return agent_type in ["player", "referee"] and len(agent_id) > 0
 
 
 def validate_parity_choice(choice: str) -> bool:

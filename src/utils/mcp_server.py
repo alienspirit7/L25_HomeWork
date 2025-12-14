@@ -3,7 +3,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 import logging
 import json
-from typing import Dict, Any, Callable, List
+from typing import Dict, Any, Callable, List, Optional
+from datetime import datetime, timezone
 
 
 class MCPServer:
@@ -107,3 +108,98 @@ class MCPServer:
         elif isinstance(result, str):
             return {"content": [{"type": "text", "text": result}]}
         return {"content": [{"type": "text", "text": json.dumps(result)}]}
+    
+    # ========================================================================
+    # Auth Token Validation
+    # ========================================================================
+    
+    def validate_auth_token(self, params: Dict, expected_token: str) -> Optional[Dict]:
+        """
+        Validate auth_token in request.
+        
+        Args:
+            params: Request parameters
+            expected_token: Expected auth token value
+        
+        Returns:
+            None if valid, error dict if invalid
+        """
+        provided_token = params.get("auth_token")
+        if not provided_token:
+            return self.create_league_error("E011", "AUTH_TOKEN_MISSING")
+        if provided_token != expected_token:
+            return self.create_league_error("E012", "AUTH_TOKEN_INVALID")
+        return None
+    
+    def validate_utc_timestamp(self, timestamp: str) -> bool:
+        """Ensure timestamp is UTC (ends with Z or +00:00)."""
+        return timestamp.endswith('Z') or timestamp.endswith('+00:00')
+    
+    # ========================================================================
+    # Error Response Helpers
+    # ========================================================================
+    
+    def create_league_error(self, error_code: str, description: str,
+                           original_message_type: Optional[str] = None,
+                           context: Optional[Dict] = None) -> Dict:
+        """
+        Create LEAGUE_ERROR response.
+        
+        Args:
+            error_code: Error code (E001, E011, etc.)
+            description: Error description
+            original_message_type: Message type that caused error
+            context: Additional context
+        
+        Returns:
+            LEAGUE_ERROR message dict
+        """
+        from .helpers import generate_conversation_id, utc_timestamp
+        return {
+            "protocol": "league.v2",
+            "message_type": "LEAGUE_ERROR",
+            "sender": "league_manager",
+            "timestamp": utc_timestamp(),
+            "conversation_id": generate_conversation_id(),
+            "error_code": error_code,
+            "error_description": description,
+            "original_message_type": original_message_type,
+            "context": context or {},
+            "retryable": error_code in ["E001", "E009"]  # Timeout and connection errors
+        }
+    
+    def create_game_error(self, error_code: str, description: str,
+                         match_id: str, affected_player: str,
+                         action_required: str, consequence: str,
+                         sender: str, retry_info: Optional[Dict] = None) -> Dict:
+        """
+        Create GAME_ERROR response.
+        
+        Args:
+            error_code: Error code (E001, E003, E004)
+            description: Error description
+            match_id: Match identifier
+            affected_player: Player ID
+            action_required: Required action that failed
+            consequence: What happens if not resolved
+            sender: Sender (e.g., "referee:REF01")
+            retry_info: Retry information dict
+        
+        Returns:
+            GAME_ERROR message dict
+        """
+        from .helpers import generate_conversation_id, utc_timestamp
+        return {
+            "protocol": "league.v2",
+            "message_type": "GAME_ERROR",
+            "sender": sender,
+            "timestamp": utc_timestamp(),
+            "conversation_id": generate_conversation_id(),
+            "match_id": match_id,
+            "error_code": error_code,
+            "error_description": description,
+            "affected_player": affected_player,
+            "action_required": action_required,
+            "retry_info": retry_info,
+            "consequence": consequence
+        }

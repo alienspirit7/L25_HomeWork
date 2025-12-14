@@ -1,6 +1,6 @@
 # Even/Odd AI Agent League System
 
-A distributed multi-agent system implementing a competitive Even/Odd game league using the **Model Context Protocol (MCP) v2024-11-05** with **JSON-RPC 2.0** over HTTP.
+A distributed multi-agent system implementing a competitive Even/Odd game league following **League Protocol V2** specification with **MCP v2024-11-05** and **JSON-RPC 2.0** over HTTP.
 
 ## Overview
 
@@ -8,7 +8,11 @@ This project demonstrates AI agent architecture through a functional game league
 
 ### Key Features
 
-- ✅ **MCP Protocol Compliance** - Full adherence to MCP v2024-11-05 specification
+- ✅ **League Protocol V2 Compliant** - 100% adherence to specification including referee registration
+- ✅ **Authentication System** - Token-based auth for all post-registration messages
+- ✅ **UTC Timestamp Enforcement** - All timestamps validated to UTC timezone
+- ✅ **LEAGUE_QUERY Support** - Players can query standings, schedule, stats, and next match
+- ✅ **Intelligent Retry Logic** - 3 retries with 2-second delays for timeout/connection errors
 - ✅ **Distributed Architecture** - HTTP-based communication enabling local and remote deployment
 - ✅ **Parallel Match Execution** - Multiple referee instances for concurrent games
 - ✅ **Player Self-Registration** - Autonomous agents register themselves
@@ -16,7 +20,7 @@ This project demonstrates AI agent architecture through a functional game league
 - ✅ **Multiple Strategies** - Random, deterministic, and LLM-based player strategies
 - ✅ **Round Standings Notifications** - Real-time standings updates after each round
 - ✅ **Comprehensive Logging** - All messages logged to files with full JSON visibility
-- ✅ **Clean Modular Code** - All Python files under 150 lines
+- ✅ **Clean Modular Code** - All Python files under 200 lines
 
 ---
 
@@ -185,24 +189,37 @@ python src/player_agent.py --port 8104 --strategy random --name "Delta"
 
 ## System Flows
 
-### 1. Player Registration Flow
+### 1. Registration Flow (Protocol V2)
 
 ```mermaid
 sequenceDiagram
-    participant P as Player Agent
+    participant R as Referee
     participant LM as League Manager
+    participant P as Player Agent
     
-    P->>P: Start up
-    P->>LM: register_player(player_meta)
-    LM->>LM: Generate player_id (P01, P02, ...)
-    LM->>LM: Store player info
-    LM-->>P: {status: "ACCEPTED", player_id: "P01"}
-    P->>P: Store player_id
+    Note over R,P: Stage 1: Referee Registration (NEW in V2)
+    R->>LM: REFEREE_REGISTER_REQUEST
+    LM->>LM: Generate referee_id, auth_token
+    LM-->>R: REFEREE_REGISTER_RESPONSE {referee_id, auth_token}
+    R->>R: Store referee_id & auth_token
+    
+    Note over P,LM: Stage 2: Player Registration
+    P->>LM: LEAGUE_REGISTER_REQUEST {protocol_version: "2.1.0"}
+    LM->>LM: Validate protocol version (≥2.0.0)
+    LM->>LM: Generate player_id, auth_token
+    LM-->>P: LEAGUE_REGISTER_RESPONSE {player_id, auth_token}
+    P->>P: Store player_id & auth_token
     
     Note over LM: After 60s timeout
     LM->>LM: Close registration
     LM->>LM: Generate round-robin schedule
 ```
+
+**Protocol V2 Changes:**
+- ✅ Referee registration required before matches
+- ✅ Auth tokens issued to all agents
+- ✅ Protocol version validation (minimum 2.0.0)
+- ✅ All subsequent messages require auth_token
 
 **Registration Timeout:**
 - Configurable (default: 60 seconds)
@@ -256,10 +273,11 @@ sequenceDiagram
 - `CHOOSE_PARITY_RESPONSE`: 30 seconds
 - Timeout = Technical Loss
 
-**Retry Logic:**
-- Invalid parity choice: retry up to 3 times
-- Network failure: retry once
-- Timeout: immediate failure (no retry)
+**Retry Logic (Protocol V2 Compliant):**
+- **E001 (Timeout)**: Retry up to 3 times with 2-second delays
+- **E009 (Connection)**: Retry up to 3 times with 2-second delays  
+- **Other errors**: Immediate failure (no retry)
+- After 3 failed retries: TECHNICAL_LOSS declared
 
 ---
 
@@ -607,14 +625,59 @@ lsof -ti:8000 | xargs kill -9
 
 ## Recent Improvements
 
+### League Protocol V2 Compliance (December 2025)
+
+**Status:** ✅ **100% Compliant** with League Protocol V2 specification
+
+**Major V2 Features Implemented:**
+
+1. **Referee Registration** - Referees must register with league manager before judging matches
+2. **Authentication System** - Token-based authentication for all agents post-registration  
+3. **UTC Timestamp Validation** - All timestamps enforced to UTC timezone (ISO-8601 with Z suffix)
+4. **Protocol Version Checking** - Validates agents support minimum version 2.0.0
+5. **LEAGUE_QUERY Feature** - Players can query league information:
+   - `GET_STANDINGS` - Current league standings
+   - `GET_SCHEDULE` - Full match schedule
+   - `GET_NEXT_MATCH` - Find next match for player
+   - `GET_PLAYER_STATS` - Detailed player statistics
+6. **Retry Policy** - 3 retries with 2-second delays for timeout/connection errors only
+7. **Spec-Compliant Messages** - All 18 message types from Protocol V2 specification
+
+**Example LEAGUE_QUERY Usage:**
+```python
+# Player queries for next match
+query_msg = {
+    "protocol": "league.v2",
+    "message_type": "LEAGUE_QUERY",
+    "sender": "player:P01",
+    "auth_token": "tok_P01_abc123...",
+    "query_type": "GET_NEXT_MATCH",
+    "query_params": {"player_id": "P01"}
+}
+
+# Response includes match details
+{
+    "success": true,
+    "data": {
+        "next_match": {
+            "match_id": "R2M1",
+            "opponent_id": "P03",
+            "referee_endpoint": "http://localhost:8001/mcp"
+        }
+    }
+}
+```
+
 ### Round Standings Notifications (December 2025)
 
 **Feature:** Real-time standings updates after each round completes.
 
+**Message Type:** `LEAGUE_STANDINGS_UPDATE` (per Protocol V2 spec)
+
 **How It Works:**
 1. League manager tracks match completion per round
 2. When all matches in a round finish, standings are calculated
-3. All players receive `ROUND_STANDINGS` message with current rankings
+3. All players receive `LEAGUE_STANDINGS_UPDATE` message with current rankings
 4. Players log formatted standings table highlighting their position
 
 **Player Log Output:**
@@ -757,15 +820,15 @@ referees:  # 25 referees for parallel execution
 
 ### Common Message Fields
 
-All messages include:
+**Protocol V2 Envelope (Required Fields):**
 ```json
 {
-  "protocol": "league.v1",
+  "protocol": "league.v2",
   "message_type": "...",
-  "league_id": "...",
-  "conversation_id": "...",
-  "sender": "...",
-  "timestamp": "2025-01-15T10:30:00Z"
+  "sender": "league_manager" or "player:P01" or "referee:REF01",
+  "timestamp": "2025-01-15T10:30:00Z",
+  "conversation_id": "conv-...",
+  "auth_token": "tok_..."  // Required after registration
 }
 ```
 
@@ -822,7 +885,7 @@ This project is created for educational purposes as part of AI Agent Development
 
 Created using Gemini AI Assistant as part of Lesson 25 Homework Assignment.
 
-**Version:** 1.0  
+**Version:** 2.0 (League Protocol V2 Compliant)  
 **Date:** December 2025
 
 ---
@@ -830,13 +893,16 @@ Created using Gemini AI Assistant as part of Lesson 25 Homework Assignment.
 ## Summary
 
 This Even/Odd AI Agent League demonstrates:
-- ✅ Distributed multi-agent systems
+- ✅ **League Protocol V2** - 100% specification compliance
+- ✅ Distributed multi-agent systems with authentication
 - ✅ MCP protocol implementation  
+- ✅ Referee and player registration workflows
+- ✅ Query-based information retrieval (LEAGUE_QUERY)
 - ✅ Autonomous agent registration
-- ✅ Parallel task execution
+- ✅ Parallel task execution with retry logic
 - ✅ Round-by-round standings notifications
 - ✅ Comprehensive logging with JSON message visibility
 - ✅ Clean, modular code architecture
 - ✅ All Python files under 200 lines
 
-Perfect for learning AI agent architecture and MCP protocol! 🚀
+Perfect for learning AI agent architecture, MCP protocol, and League Protocol V2! 🚀

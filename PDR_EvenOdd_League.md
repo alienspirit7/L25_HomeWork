@@ -1,10 +1,10 @@
 # Product Design Review (PDR)
 ## Even/Odd AI Agent League System
 
-**Version:** 1.0  
+**Version:** 2.0 (League Protocol V2 Compliant)  
 **Date:** December 2025  
 **LLM for Development:** Gemini API  
-**Protocol:** MCP (Model Context Protocol) v2024-11-05  
+**Protocol:** League Protocol V2 + MCP v2024-11-05  
 **Transport:** HTTP + JSON-RPC 2.0
 
 ---
@@ -33,17 +33,64 @@ The Even/Odd AI Agent League is a distributed multi-agent system that implements
 
 ### 1.2 Key Objectives
 
-1. **Implement MCP Protocol**: Full compliance with MCP v2024-11-05 specification using JSON-RPC 2.0
-2. **Agent-Based Architecture**: Three-layer separation (League, Referee, Game Rules)
-3. **Distributed Communication**: HTTP-based transport enabling local and remote deployment
-4. **Educational Platform**: Demonstrate AI agent principles through practical implementation
+1. **League Protocol V2 Compliance**: 100% adherence to League Protocol V2 specification
+2. **Referee Registration**: Referees must register with league manager before judging matches
+3. **Authentication System**: Token-based authentication for all agents post-registration
+4. **UTC Timestamp Enforcement**: All timestamps validated to UTC timezone
+5. **Query System**: Players can query league information (LEAGUE_QUERY feature)
+6. **Agent-Based Architecture**: Three-layer separation (League, Referee, Game Rules)
+7. **Distributed Communication**: HTTP-based transport enabling local and remote deployment
+8. **Educational Platform**: Demonstrate AI agent principles and Protocol V2
 
 ### 1.3 Core Principles
 
+- **Protocol V2 Compliance**: Full adherence to League Protocol V2 specification
 - **Separation of Concerns**: Clear delineation between league management, game refereeing, and specific game logic
 - **Protocol-First Design**: Universal JSON-RPC interface enabling language-agnostic implementations
+- **Authentication**: Token-based security for all post-registration communications
+- **UTC Timestamps**: All timestamps in UTC timezone (ISO-8601 with Z suffix)
 - **Stateless Communication**: Referee as single source of truth for game state
+- **Intelligent Retry**: 3 retries with 2-second delays for timeout/connection errors only
 - **Scalability**: Architecture supports expansion from 4 to thousands of players
+
+### 1.4 Protocol V2 Features Summary
+
+This implementation achieves **100% compliance** with League Protocol V2 specification:
+
+1. **Referee Registration** - Referees register before judging matches
+   - `REFEREE_REGISTER_REQUEST` / `REFEREE_REGISTER_RESPONSE` messages
+   - Referee receives `referee_id` and `auth_token`
+
+2. **Authentication System** - Token-based security
+   - Auth tokens generated during registration for all agents
+   - Required in all post-registration messages
+   - Validation errors: E011 (missing), E012 (invalid)
+
+3. **UTC Timestamp Enforcement**
+   - All timestamps MUST be UTC (ISO-8601 with 'Z' or '+00:00' suffix)
+   - Validation error E021 for non-UTC timestamps
+   - Automatic enforcement via Pydantic schemas
+
+4. **Protocol Version Validation**
+   - Players must declare `protocol_version` in registration
+   - League Manager validates minimum version 2.0.0
+   - Version mismatch error: E018
+
+5. **LEAGUE_QUERY System** - Information retrieval
+   - `GET_STANDINGS` - Current league standings with display names
+   - `GET_SCHEDULE` - Full match schedule with completion status
+   - `GET_NEXT_MATCH` - Find next match for specific player
+   - `GET_PLAYER_STATS` - Detailed player statistics
+
+6. **Intelligent Retry Policy**
+   - Timeout errors (E001): Retry up to 3 times with 2-second delays
+   - Connection errors (E009): Retry up to 3 times with 2-second delays
+   - Other errors: Immediate failure (no retry)
+
+7. **Message Envelope V2**
+   - Sender format: `"league_manager"`, `"player:P01"`, `"referee:REF01"`
+   - All 18 message types from specification implemented
+   - Complete error code catalog
 
 ---
 
@@ -111,15 +158,19 @@ The Even/Odd AI Agent League is a distributed multi-agent system that implements
 - **Referee**: Acts as match-level orchestrator (game invitations, choice collection, results)
 - **Players**: Self-register by calling League Manager's `register_player` tool
 
-### 2.3 MCP Server/Client Relationships
+### 2.3 MCP Server/Client Relationships (Protocol V2)
 
 | Component | Primary Role | Also Acts As | Port | Key Tools Exposed |
 |-----------|-------------|--------------|------|-------------------|
-| League Manager | MCP Server (League Orchestrator) | MCP Client (to notify players) | 8000 | `register_player`, `create_schedule`, `report_match_result`, `get_standings` |
-| Referee | MCP Server (Match Orchestrator) | MCP Client (to call players) | 8001 | `start_match`, `collect_choices`, `draw_number`, `finalize_match` |
-| Player Agent | MCP Server | - | 8101-8104 | `handle_game_invitation`, `choose_parity`, `notify_match_result` |
+| League Manager | MCP Server (League Orchestrator) | MCP Client (to notify players/referees) | 8000 | `register_referee`, `register_player`, `report_match_result`, `get_standings`, `handle_league_query` |
+| Referee | MCP Server (Match Orchestrator) | MCP Client (to call players) | 8001 | `start_match`, `notify_league_completed` |
+| Player Agent | MCP Server | - | 8101-8104 | `handle_game_invitation`, `choose_parity`, `notify_match_result`, `notify_standings` |
 
-**Note**: League Manager handles league-level orchestration; Referee handles match-level orchestration. Players self-register by calling League Manager's `register_player` tool.
+**Protocol V2 Notes**: 
+- **Referees** must register with League Manager before judging matches
+- **Players** self-register by calling League Manager's `register_player` tool
+- **Authentication tokens** issued during registration, required for all subsequent messages
+- **League Query** system allows players to request standings, schedule, stats, and next match info
 
 ### 2.4 Technology Stack
 
@@ -138,13 +189,26 @@ The Even/Odd AI Agent League is a distributed multi-agent system that implements
 ### 3.1 League Manager Specification
 
 #### 3.1.1 Purpose
-Manages the entire league lifecycle from player registration through final standings calculation. Acts as the league-level orchestrator.
+Manages the entire league lifecycle from referee/player registration through final standings calculation. Acts as the league-level orchestrator.
 
-**Registration Process:**
-- Players self-register by calling the `register_player` tool
-- League Manager waits for a configurable registration period (default: 60 seconds)
-- After registration period ends, League Manager proceeds to schedule creation
-- Players connecting after registration period are rejected
+**Protocol V2 Registration Process:**
+1. **Referee Registration** (NEW in V2):
+   - Referees call `register_referee` tool before judging matches
+   - League Manager generates `referee_id` and `auth_token`
+   - Referee stores token for use in all subsequent messages
+
+2. **Player Registration**:
+   - Players self-register by calling the `register_player` tool
+   - Players must include `protocol_version` (e.g., "2.1.0") in metadata
+   - League Manager validates protocol version (≥2.0.0)
+   - League Manager generates `player_id` and `auth_token`
+   - League Manager waits for a configurable registration period (default: 60 seconds)
+   - After registration period ends, League Manager proceeds to schedule creation
+   - Players connecting after registration period are rejected
+
+3. **Query System** (NEW in V2):
+   - Players/referees can query league information using `handle_league_query`
+   - Supports GET_STANDINGS, GET_SCHEDULE, GET_NEXT_MATCH, GET_PLAYER_STATS
 
 #### 3.1.2 State
 
@@ -152,7 +216,10 @@ Manages the entire league lifecycle from player registration through final stand
 class LeagueState:
     league_id: str               # Unique league identifier
     game_type: str               # "even_odd"
-    players: Dict[str, PlayerMeta]  # player_id -> metadata
+    referees: Dict[str, RefereeMeta]  # referee_id -> metadata (NEW in V2)
+    referee_tokens: Dict[str, str]    # referee_id -> auth_token (NEW in V2)
+    players: Dict[str, PlayerMeta]    # player_id -> metadata
+    player_tokens: Dict[str, str]     # player_id -> auth_token (NEW in V2)
     schedule: List[Match]        # All matches
     results: Dict[str, MatchResult]  # match_id -> result
     standings: List[StandingsEntry]  # Ordered by rank
@@ -566,20 +633,26 @@ def choose_parity_llm(context: dict, history: list) -> str:
 
 ## 4. Message Protocol Specifications
 
-### 4.1 Common Message Structure
+### 4.1 Common Message Structure (Protocol V2)
 
 All messages in the league protocol MUST include these base fields:
 
 ```json
 {
-  "protocol": "league.v1",
+  "protocol": "league.v2",
   "message_type": "<MESSAGE_TYPE>",
-  "league_id": "league_2025_even_odd",
+  "sender": "league_manager | player:P01 | referee:REF01",
+  "timestamp": "2025-01-15T10:30:00Z",
   "conversation_id": "uuid-string",
-  "sender": "league_manager | referee | player:P01",
-  "timestamp": "2025-01-15T10:30:00Z"
+  "auth_token": "tok_..."  // Required after registration
 }
 ```
+
+**Protocol V2 Requirements:**
+- **protocol**: Must be "league.v2"
+- **sender**: Format is "league_manager", "player:<ID>", or "referee:<ID>"
+- **timestamp**: MUST be UTC (ISO-8601 ending with 'Z' or '+00:00')
+- **auth_token**: Required for all messages after registration (E012 error if invalid/missing)
 
 **Additional Required Fields:**
 
@@ -612,36 +685,68 @@ All messages in the league protocol MUST include these base fields:
 
 #### 4.2.1 League Registration Messages
 
-**LEAGUE_REGISTER_REQUEST**
+**LEAGUE_REGISTER_REQUEST (Protocol V2)**
 ```json
 {
-  "protocol": "league.v1",
+  "protocol": "league.v2",
   "message_type": "LEAGUE_REGISTER_REQUEST",
-  "league_id": "league_2025_even_odd",
-  "conversation_id": "conv-reg-001",
   "sender": "player:unknown",
   "timestamp": "2025-01-15T10:29:00Z",
+  "conversation_id": "conv-reg-001",
+  "league_id": "league_2025_even_odd",
   "player_meta": {
     "display_name": "Agent Alpha",
     "version": "1.0.0",
+    "protocol_version": "2.1.0",
     "game_types": ["even_odd"],
     "contact_endpoint": "http://localhost:8101/mcp"
   }
 }
 ```
 
-**LEAGUE_REGISTER_RESPONSE**
+**LEAGUE_REGISTER_RESPONSE (Protocol V2)**
 ```json
 {
-  "protocol": "league.v1",
+  "protocol": "league.v2",
   "message_type": "LEAGUE_REGISTER_RESPONSE",
-  "league_id": "league_2025_even_odd",
-  "conversation_id": "conv-reg-001",
   "sender": "league_manager",
   "timestamp": "2025-01-15T10:29:01Z",
+  "conversation_id": "conv-reg-001",
+  "league_id": "league_2025_even_odd",
   "player_id": "P01",
+  "auth_token": "tok_P01_abc123def456",
   "status": "ACCEPTED",
   "reason": null
+}
+```
+
+**NEW in V2: REFEREE_REGISTER_REQUEST/RESPONSE**
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "REFEREE_REGISTER_REQUEST",
+  "sender": "referee:unknown",
+  "timestamp": "2025-01-15T10:28:00Z",
+  "conversation_id": "conv-ref-reg-001",
+  "referee_meta": {
+    "display_name": "Referee-8001",
+    "version": "1.0.0",
+    "game_types": ["even_odd"],
+    "contact_endpoint": "http://localhost:8001/mcp",
+    "max_concurrent_matches": 2
+  }
+}
+
+// Response
+{
+  "protocol": "league.v2",
+  "message_type": "REFEREE_REGISTER_RESPONSE",
+  "sender": "league_manager",
+  "timestamp": "2025-01-15T10:28:01Z",
+  "conversation_id": "conv-ref-reg-001",
+  "referee_id": "REF01",
+  "auth_token": "tok_REF01_xyz789",
+  "status": "ACCEPTED"
 }
 ```
 

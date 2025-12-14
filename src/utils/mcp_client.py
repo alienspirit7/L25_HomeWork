@@ -78,17 +78,57 @@ class MCPClient:
         endpoint: str,
         tool_name: str,
         arguments: Dict[str, Any],
-        max_retries: int = 1
+        max_retries: int = 3,
+        retry_delay: float = 2.0
     ) -> Optional[Dict[str, Any]]:
-        """Call tool with retry on network failure."""
+        """
+        Call tool with retry on retryable errors.
+        
+        Per League Protocol V2 spec (section 2.9.4):
+        - Maximum retries: 3
+        - Delay between retries: 2 seconds
+        - Retryable errors: E001 (timeout), E009 (connection)
+        
+        Args:
+            endpoint: MCP endpoint URL
+            tool_name: Name of tool to call
+            arguments: Tool arguments
+            max_retries: Maximum number of retries (default: 3)
+            retry_delay: Delay in seconds between retries (default: 2.0)
+        
+        Returns:
+            Tool result or None if all retries exhausted
+        """
+        import asyncio
+        
         for attempt in range(max_retries + 1):
             try:
                 return await self.call_tool(endpoint, tool_name, arguments)
-            except Exception as e:
+            except httpx.TimeoutException as e:
+                # E001: TIMEOUT_ERROR - retryable
                 if attempt < max_retries:
-                    self.logger.warning(f"Retry {attempt + 1}/{max_retries} for {tool_name}")
+                    self.logger.warning(
+                        f"Timeout on {tool_name} (attempt {attempt + 1}/{max_retries + 1}). "
+                        f"Retrying in {retry_delay}s..."
+                    )
+                    await asyncio.sleep(retry_delay)
                     continue
-                self.logger.error(f"All retries exhausted for {tool_name}")
+                self.logger.error(f"Timeout: All {max_retries} retries exhausted for {tool_name}")
+                return None
+            except httpx.ConnectError as e:
+                # E009: CONNECTION_ERROR - retryable
+                if attempt < max_retries:
+                    self.logger.warning(
+                        f"Connection error on {tool_name} (attempt {attempt + 1}/{max_retries + 1}). "
+                        f"Retrying in {retry_delay}s..."
+                    )
+                    await asyncio.sleep(retry_delay)
+                    continue
+                self.logger.error(f"Connection error: All {max_retries} retries exhausted for {tool_name}")
+                return None
+            except Exception as e:
+                # Non-retryable errors - fail immediately
+                self.logger.error(f"Non-retryable error on {tool_name}: {e}")
                 return None
     
     async def close(self):
