@@ -1,0 +1,24 @@
+{
+    "schema_version": "1.0.0",
+    "last_updated": "2025-12-15T00:00:00Z",
+    "games": [
+        {
+            "game_type": "even_odd",
+            "display_name": "Even or Odd",
+            "description": "Players choose even or odd, then reveal simultaneously. Winner determined by sum parity.",
+            "version": "1.0.0",
+            "min_players": 2,
+            "max_players": 2,
+            "rules_reference": "SHARED/league_sdk/game_rules/even_odd.py",
+            "valid_moves": [
+                "even",
+                "odd"
+            ],
+            "outcomes": [
+                "WIN",
+                "LOSS",
+                "DRAW"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+    "schema_version": "1.0.0",
+    "league_id": "league_2025_even_odd",
+    "display_name": "Even/Odd League 2025",
+    "game_type": "even_odd",
+    "status": "active",
+    "scoring": {
+        "win_points": 3,
+        "draw_points": 1,
+        "loss_points": 0,
+        "technical_loss_points": 0,
+        "tiebreakers": [
+            "total_points",
+            "num_wins",
+            "num_draws"
+        ]
+    },
+    "schedule": {
+        "format": "round_robin",
+        "rounds_per_matchup": 1,
+        "parallel_matches": true
+    },
+    "participants": {
+        "min_players": 2,
+        "max_players": 100,
+        "registered_players": []
+    },
+    "settings": {
+        "registration_timeout_sec": 60,
+        "auto_start_when_ready": false,
+        "publish_standings_after_round": true
+    }
+}

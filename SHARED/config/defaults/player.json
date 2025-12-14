@@ -1,0 +1,14 @@
+{
+    "player_id": "PLAYER_TEMPLATE",
+    "display_name": "Player Template",
+    "version": "1.0.0",
+    "preferred_leagues": [],
+    "game_types": [],
+    "strategy": "random",
+    "active": true,
+    "settings": {
+        "auto_register": true,
+        "track_history": true,
+        "log_decisions": true
+    }
+}

@@ -1,0 +1,230 @@
+"""Helper utility functions."""
+import uuid
+import logging
+import hashlib
+import secrets
+from datetime import datetime, timezone
+from typing import List, Dict, Tuple, Optional
+from pathlib import Path
+
+
+# ============================================================================
+# Error Code Constants
+# ============================================================================
+
+ERROR_CODES = {
+    "E001": "TIMEOUT_ERROR",
+    "E003": "MISSING_REQUIRED_FIELD",
+    "E004": "INVALID_PARITY_CHOICE",
+    "E005": "PLAYER_NOT_REGISTERED",
+    "E009": "CONNECTION_ERROR",
+    "E011": "AUTH_TOKEN_MISSING",
+    "E012": "AUTH_TOKEN_INVALID",
+    "E013": "REFEREE_NOT_REGISTERED",
+    "E018": "PROTOCOL_VERSION_MISMATCH",
+    "E021": "INVALID_TIMESTAMP",
+}
+
+
+# ============================================================================
+# Timestamp and ID Helpers
+# ============================================================================
+
+def get_iso_timestamp() -> str:
+    """Generate ISO-8601 timestamp with Z suffix (UTC)."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def utc_timestamp() -> str:
+    """Alias for get_iso_timestamp - returns UTC timestamp."""
+    return get_iso_timestamp()
+
+
+def validate_utc_timestamp(timestamp: str) -> bool:
+    """Validate that timestamp is in UTC format (ends with Z or +00:00)."""
+    return timestamp.endswith('Z') or timestamp.endswith('+00:00')
+
+
+def is_utc_format(timestamp: str) -> bool:
+    """Check if timestamp follows UTC format."""
+    return validate_utc_timestamp(timestamp)
+
+
+def generate_conversation_id(prefix: str = "conv") -> str:
+    """Generate unique conversation ID."""
+    return f"{prefix}-{uuid.uuid4().hex[:8]}"
+
+
+def create_match_id(round_id: int, match_num: int) -> str:
+    """Generate match ID (e.g., R1M1, R2M3)."""
+    return f"R{round_id}M{match_num}"
+
+
+# ============================================================================
+# Authentication and Validation
+# ============================================================================
+
+def generate_auth_token(agent_type: str, agent_id: str) -> str:
+    """
+    Generate authentication token in format: tok_{agent_id}_{hash}
+    
+    Args:
+        agent_type: "player" or "referee"
+        agent_id: Agent identifier (e.g., "P01", "REF01")
+    
+    Returns:
+        Auth token string (e.g., "tok_P01_abc123def456")
+    """
+    # Generate secure random hash
+    hash_part = hashlib.sha256(secrets.token_bytes(32)).hexdigest()[:12]
+    return f"tok_{agent_id}_{hash_part}"
+
+
+def validate_sender_format(sender: str) -> bool:
+    """
+    Validate sender format: "player:P01", "referee:REF01", or "league_manager"
+    
+    Args:
+        sender: Sender identifier string
+    
+    Returns:
+        True if valid format, False otherwise
+    """
+    if sender == "league_manager":
+        return True
+    if ":" not in sender:
+        return False
+    agent_type, agent_id = sender.split(":", 1)
+    return agent_type in ["player", "referee"] and len(agent_id) > 0
+
+
+def validate_parity_choice(choice: str) -> bool:
+    """Validate parity choice is exactly 'even' or 'odd'."""
+    return choice in ["even", "odd"]
+
+
+def generate_round_robin_schedule(player_ids: List[str]) -> List[Tuple[str, str, int, int]]:
+    """
+    Generate round-robin schedule for players.
+    Returns: List of (player_A_id, player_B_id, round_id, match_num)
+    """
+    n = len(player_ids)
+    matches = []
+    match_counter = 1
+    
+    # Round-robin algorithm
+    for round_id in range(1, n):
+        for i in range(n // 2):
+            j = n - 1 - i
+            if i != j:  # Skip self-matches
+                player_A = player_ids[i]
+                player_B = player_ids[j]
+                matches.append((player_A, player_B, round_id, match_counter))
+                match_counter += 1
+        
+        # Rotate players (keep first fixed)
+        player_ids = [player_ids[0]] + [player_ids[-1]] + player_ids[1:-1]
+    
+    return matches
+
+
+def calculate_standings(results: Dict[str, Dict]) -> List[Dict]:
+    """
+    Calculate league standings from match results.
+    Tie-breaking: points -> wins -> draws -> alphabetical
+    """
+    stats = {}
+    
+    # Initialize stats for all players
+    for match_id, result in results.items():
+        for player_id in result['score'].keys():
+            if player_id not in stats:
+                stats[player_id] = {
+                    'player_id': player_id,
+                    'played': 0,
+                    'wins': 0,
+                    'draws': 0,
+                    'losses': 0,
+                    'points': 0
+                }
+    
+    # Calculate statistics
+    for match_id, result in results.items():
+        winner = result.get('winner')
+        for player_id, points in result['score'].items():
+            stats[player_id]['played'] += 1
+            stats[player_id]['points'] += points
+            
+            if winner is None:  # Draw
+                stats[player_id]['draws'] += 1
+            elif winner == player_id:  # Win
+                stats[player_id]['wins'] += 1
+            else:  # Loss
+                stats[player_id]['losses'] += 1
+    
+    # Sort by: points (desc), wins (desc), draws (desc), player_id (asc)
+    standings = sorted(
+        stats.values(),
+        key=lambda x: (-x['points'], -x['wins'], -x['draws'], x['player_id'])
+    )
+    
+    # Add rank
+    for rank, entry in enumerate(standings, start=1):
+        entry['rank'] = rank
+    
+    return standings
+
+
+def determine_parity(number: int) -> str:
+    """Determine if number is even or odd."""
+    return "even" if number % 2 == 0 else "odd"
+
+
+def setup_logging(log_dir: str = "logs", log_file: str = None, level: str = "INFO"):
+    """
+    Configure logging to both console and file.
+    
+    Args:
+        log_dir: Directory to store log files (default: 'logs')
+        log_file: Name of log file (default: auto-generated based on timestamp and caller)
+        level: Logging level (default: 'INFO')
+    """
+    # Create logs directory if it doesn't exist
+    log_path = Path(log_dir)
+    log_path.mkdir(exist_ok=True)
+    
+    # Generate log file name if not provided
+    if log_file is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = f"{timestamp}.log"
+    
+    log_file_path = log_path / log_file
+    
+    # Set logging level
+    log_level = getattr(logging, level.upper(), logging.INFO)
+    
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+    
+    # Clear existing handlers to avoid duplicates
+    root_logger.handlers.clear()
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+    
+    # File handler
+    file_handler = logging.FileHandler(log_file_path, mode='a', encoding='utf-8')
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
+    root_logger.addHandler(file_handler)
+    
+    logging.info(f"Logging configured: Console + {log_file_path}")
+    
+    return str(log_file_path)

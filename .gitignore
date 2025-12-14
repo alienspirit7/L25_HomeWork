@@ -12,11 +12,14 @@ ENV/
 dist/
 build/
 
-# Data and logs
-data/
-logs/
+# Data and logs (old structure - ignore)
+/data/
+/logs/
 *.log
-*.json
+
+# Allow SHARED directory structure
+!/SHARED/
+!/SHARED/**/*.json
 
 # IDE
 .vscode/

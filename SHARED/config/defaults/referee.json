@@ -1,0 +1,13 @@
+{
+    "referee_id": "REF_TEMPLATE",
+    "display_name": "Referee Template",
+    "version": "1.0.0",
+    "game_types": [],
+    "max_concurrent_matches": 5,
+    "active": true,
+    "settings": {
+        "strict_timeouts": true,
+        "log_all_messages": true,
+        "validate_moves": true
+    }
+}
