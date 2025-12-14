@@ -491,11 +491,11 @@ Both templates are fully functional and ready to customize with:
 ---
 
 ## Quick Start
-
 ### Prerequisites
 
 - Python 3.8+
 - pip
+- 7 terminal windows (1 League Manager + 2 Referees + 4 Players)
 
 ### Installation
 
@@ -505,7 +505,7 @@ cd /path/to/L25_HomeWork
 
 # Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\\Scripts\\activate
 
 # Install common dependencies
 pip install -r requirements.txt
@@ -524,36 +524,248 @@ For players using Gemini LLM strategy:
 export GEMINI_API_KEY="your-api-key-here"
 ```
 
-### Running the League
+---
 
-**Step 1: Install agent dependencies**
+## Running the League (4 Players, 2 Referees)
+
+This guide provides **detailed step-by-step instructions** to run a complete league locally with 4 players and 2 referees.
+
+### Step 1: Prepare Agent Directories
+
+First, create the necessary agent instances from templates:
+
 ```bash
+# From project root: /path/to/L25_HomeWork
+
+# Create 2 referee instances
+cp -r agents/referee_template agents/referee_REF01
+cp -r agents/referee_template agents/referee_REF02
+
+# Create 4 player instances
+cp -r agents/player_template agents/player_P01
+cp -r agents/player_template agents/player_P02
+cp -r agents/player_template agents/player_P03
+cp -r agents/player_template agents/player_P04
+```
+
+### Step 2: Install Dependencies for All Agents
+
+```bash
+# Install league_manager dependencies
 cd agents/league_manager
+pip install -r requirements.txt
+cd ../..
+
+# Install referee dependencies
+cd agents/referee_REF01
+pip install -r requirements.txt
+cd ../..
+
+cd agents/referee_REF02
+pip install -r requirements.txt
+cd ../..
+
+# Install player dependencies
+cd agents/player_P01
+pip install -r requirements.txt
+cd ../..
+
+cd agents/player_P02
+pip install -r requirements.txt
+cd ../..
+
+cd agents/player_P03
+pip install -r requirements.txt
+cd ../..
+
+cd agents/player_P04
 pip install -r requirements.txt
 cd ../..
 ```
 
-**Step 2: Run League Manager**
+### Step 3: Start All Agents (7 Terminals)
+
+Open **7 separate terminal windows** and activate the virtual environment in each:
+
+```bash
+# In each terminal:
+cd /path/to/L25_HomeWork
+source venv/bin/activate  # On Windows: venv\\Scripts\\activate
+```
+
+#### Terminal 1: League Manager (Port 8000)
+
 ```bash
 cd agents/league_manager
 python main.py --league-id league_2025_even_odd
 ```
 
-**Step 3: Run Referees and Players** (in separate terminals)
+**Expected output:** `League Manager started on http://localhost:8000`
 
-The templates in `agents/referee_template/` and `agents/player_template/` are complete and ready to use.
+---
 
-To create your own agents:
-1. Copy `agents/referee_template/` to `agents/referee_REF01/`
-2. Copy `agents/player_template/` to `agents/player_P01/`, `agents/player_P02/`, etc.
-3. Update each agent's configuration (port, strategy, etc.)
-4. Install dependencies: `cd agents/player_P01 && pip install -r requirements.txt`
-5. Run each agent in its own terminal: `python main.py --player-id P01 --port 8101`
+#### Terminal 2: Referee #1 (Port 8001)
 
-**Template Features:**
-- **Referee**: Full match orchestration with game logic module
-- **Player**: Multiple strategies (random, always_even, always_odd, alternating, adaptive)
-- **Both**: Complete SDK integration, logging, and error handling
+```bash
+cd agents/referee_REF01
+python main.py --referee-id REF01 --port 8001 --league-manager http://localhost:8000/mcp
+```
+
+**Expected output:** `Referee REF01 started on http://localhost:8001`
+
+---
+
+#### Terminal 3: Referee #2 (Port 8002)
+
+```bash
+cd agents/referee_REF02
+python main.py --referee-id REF02 --port 8002 --league-manager http://localhost:8000/mcp
+```
+
+**Expected output:** `Referee REF02 started on http://localhost:8002`
+
+---
+
+#### Terminal 4: Player #1 (Port 8101)
+
+```bash
+cd agents/player_P01
+python main.py --player-id P01 --port 8101 --strategy random --league-manager http://localhost:8000/mcp
+```
+
+**Expected output:** `Player P01 started on http://localhost:8101`
+
+---
+
+#### Terminal 5: Player #2 (Port 8102)
+
+```bash
+cd agents/player_P02
+python main.py --player-id P02 --port 8102 --strategy always_even --league-manager http://localhost:8000/mcp
+```
+
+**Expected output:** `Player P02 started on http://localhost:8102`
+
+---
+
+#### Terminal 6: Player #3 (Port 8103)
+
+```bash
+cd agents/player_P03
+python main.py --player-id P03 --port 8103 --strategy always_odd --league-manager http://localhost:8000/mcp
+```
+
+**Expected output:** `Player P03 started on http://localhost:8103`
+
+---
+
+#### Terminal 7: Player #4 (Port 8104)
+
+```bash
+cd agents/player_P04
+python main.py --player-id P04 --port 8104 --strategy alternating --league-manager http://localhost:8000/mcp
+```
+
+**Expected output:** `Player P04 started on http://localhost:8104`
+
+---
+
+### Step 4: Watch the League Run
+
+**What happens next:**
+
+1. **Registration Phase (60 seconds)**
+   - Referees register with League Manager
+   - Players self-register with League Manager
+   - League Manager generates round-robin schedule (6 matches total)
+
+2. **Match Execution Phase**
+   - Referees orchestrate matches in parallel
+   - Players receive invitations and make choices
+   - Match results reported back to League Manager
+
+3. **Standings Updates**
+   - After each round completes, all players receive standings notifications
+   - League Manager logs intermediate standings
+
+4. **Final Results**
+   - League Manager calculates final standings
+   - Winner announced with complete statistics
+
+### Step 5: View Logs and Results
+
+All structured logs are saved in JSONL format:
+
+```bash
+# League Manager logs
+tail -f SHARED/logs/league_manager/league_2025_even_odd.jsonl
+
+# Referee logs
+tail -f SHARED/logs/referees/REF01.jsonl
+tail -f SHARED/logs/referees/REF02.jsonl
+
+# Player logs
+tail -f SHARED/logs/players/P01.jsonl
+tail -f SHARED/logs/players/P02.jsonl
+tail -f SHARED/logs/players/P03.jsonl
+tail -f SHARED/logs/players/P04.jsonl
+
+# Final standings
+cat SHARED/data/standings/league_2025_even_odd.json
+```
+
+---
+
+### Available Player Strategies
+
+You can customize player strategies when starting them:
+
+- `random` - Randomly chooses "even" or "odd"
+- `always_even` - Always chooses "even"
+- `always_odd` - Always chooses "odd"
+- `alternating` - Alternates between "even" and "odd"
+- `adaptive` - Adapts based on opponent history (requires context)
+- `llm` - Uses Gemini LLM (requires `GEMINI_API_KEY`)
+
+**Example:**
+```bash
+python main.py --player-id P01 --port 8101 --strategy llm --league-manager http://localhost:8000/mcp
+```
+
+---
+
+### Troubleshooting
+
+**Port already in use:**
+```bash
+# Find process using port 8000
+lsof -ti:8000 | xargs kill -9
+
+# Or change the port when starting agents
+python main.py --port 8005
+```
+
+**Connection errors:**
+- Ensure League Manager starts first (Terminal 1)
+- Ensure all agents use correct League Manager endpoint
+- Check firewall settings allow localhost connections
+
+**Registration timeout:**
+- Start all players within 60 seconds of League Manager startup
+- Increase timeout in `SHARED/config/leagues/league_2025_even_odd.json`
+
+---
+
+### Quick Restart
+
+To quickly restart the entire league:
+
+```bash
+# Kill all Python processes (use with caution!)
+pkill -f "python main.py"
+
+# Then restart each terminal following Step 3
+```
 
 ---
 
@@ -1256,3 +1468,16 @@ This Even/Odd AI Agent League demonstrates:
 - ✅ All Python files under 200 lines
 
 Perfect for learning AI agent architecture, MCP protocol, and League Protocol V2! 🚀
+
+---
+
+## References
+
+1. Y. Segal, *AI Agents with MCP*. Dr. Yoram Segal, 2025, Hebrew edition.
+
+2. Anthropic, *Model context protocol specification*, 2024. [Online]. Available: https://modelcontextprotocol.io/
+
+3. JSON-RPC Working Group, *Json-rpc 2.0 specification*, 2010. [Online]. Available: https://www.jsonrpc.org/specification
+
+4. K. Stratis, *AI Agents with MCP*. O'Reilly Media, 2025, Early Release.
+
