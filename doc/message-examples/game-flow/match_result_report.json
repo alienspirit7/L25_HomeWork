@@ -1,0 +1,23 @@
+{
+    "protocol": "league.v2",
+    "message_type": "MATCH_RESULT_REPORT",
+    "sender": "referee:REF01",
+    "auth_token": "tok_ref_REF01_a1b2c3d4e5f6",
+    "timestamp": "2025-12-15T00:35:20Z",
+    "conversation_id": "conv_match_R1M1",
+    "league_id": "league_2025_even_odd",
+    "match_id": "R1M1",
+    "round_id": 1,
+    "result": {
+        "winner": "P01",
+        "score": {
+            "P01": "even",
+            "P02": "odd"
+        },
+        "details": {
+            "drawn_number": 4,
+            "parity": "even",
+            "outcome": "PLAYER_A_WIN"
+        }
+    }
+}

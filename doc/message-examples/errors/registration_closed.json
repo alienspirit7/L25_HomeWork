@@ -1,0 +1,15 @@
+{
+    "protocol": "league.v2",
+    "message_type": "LEAGUE_ERROR",
+    "sender": "league_manager",
+    "timestamp": "2025-12-15T00:29:00Z",
+    "conversation_id": "conv_error_002",
+    "error_code": "E018",
+    "error_message": "REGISTRATION_CLOSED",
+    "original_message_type": "LEAGUE_REGISTER_REQUEST",
+    "context": {
+        "registration_timeout": 60,
+        "current_time": "2025-12-15T00:29:00Z",
+        "deadline": "2025-12-15T00:28:30Z"
+    }
+}

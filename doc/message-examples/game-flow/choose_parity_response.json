@@ -1,0 +1,11 @@
+{
+    "protocol": "league.v2",
+    "message_type": "CHOOSE_PARITY_RESPONSE",
+    "sender": "player:P01",
+    "timestamp": "2025-12-15T00:35:12Z",
+    "conversation_id": "conv_match_R1M1",
+    "league_id": "league_2025_even_odd",
+    "match_id": "R1M1",
+    "player_id": "P01",
+    "parity_choice": "even"
+}

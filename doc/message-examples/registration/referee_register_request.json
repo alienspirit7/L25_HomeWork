@@ -1,0 +1,17 @@
+{
+    "protocol": "league.v2",
+    "message_type": "REFEREE_REGISTER_REQUEST",
+    "sender": "referee:pending",
+    "timestamp": "2025-12-15T00:30:00Z",
+    "conversation_id": "conv_ref_reg_001",
+    "league_id": "league_2025_even_odd",
+    "referee_meta": {
+        "display_name": "Referee Alpha",
+        "version": "2.0.0",
+        "game_types": [
+            "even_odd"
+        ],
+        "contact_endpoint": "http://localhost:8001/mcp",
+        "max_concurrent_matches": 2
+    }
+}

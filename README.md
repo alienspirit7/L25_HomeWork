@@ -44,7 +44,7 @@ L25_HomeWork/
 │   │   ├── league_manager/      # League manager logs
 │   │   ├── referees/            # Referee logs by ID
 │   │   └── players/             # Player logs by ID
-│   ├── league_sdk/              # Python SDK for all agents (17 files)
+│   ├── league_sdk/              # Python SDK for all agents
 │   │   ├── __init__.py          # Package exports
 │   │   ├── config_models.py    # Dataclasses for configurations (15 classes)
 │   │   ├── config_loader.py    # Lazy loading with caching
@@ -59,20 +59,29 @@ L25_HomeWork/
 │   │       └── even_odd.py     # Even/Odd game implementation
 │   └── pyproject.toml          # SDK packaging configuration
 ├── agents/                      # Modular agent implementations
-│   ├── league_manager/          # Modular league manager (Section 11 pattern)
+│   ├── league_manager/          # League manager (modular structure)
 │   │   ├── main.py             # Entry point with SDK integration (~200 lines)
 │   │   ├── handlers.py         # Message handling logic (~280 lines)
 │   │   ├── scheduler.py        # Round management (~220 lines)
 │   │   └── requirements.txt    # Python dependencies
-│   ├── referee_template/        # Referee template with SDK
-│   │   └── main.py             # Referee example implementation
-│   └── player_template/         # Player template with SDK
-│       └── main.py             # Player example implementation
-├── scripts/                     # Helper scripts
-│   └── (launch scripts can be added here)
+│   ├── referee_template/        # Complete referee template (ready to use)
+│   │   ├── main.py             # Entry point and initialization
+│   │   ├── handlers.py         # Message handling and match orchestration
+│   │   ├── game_logic.py       # Match execution using SDK game rules
+│   │   └── requirements.txt    # Python dependencies
+│   └── player_template/         # Complete player template (ready to use)
+│       ├── main.py             # Entry point and initialization
+│       ├── handlers.py         # Message handling and league interaction
+│       ├── strategy.py         # Playing strategies (random, deterministic, adaptive)
+│       └── requirements.txt    # Python dependencies
 ├── doc/                         # Documentation and examples
 │   ├── diagrams/                # Architecture diagrams
-│   └── message-examples/        # Protocol message examples
+│   │   └── architecture.md     # Mermaid diagrams (system, flows, components)
+│   ├── message-examples/        # Protocol V2 message examples
+│   │   ├── registration/       # Registration flow examples (4 files)
+│   │   ├── game-flow/          # Match execution examples (5 files)
+│   │   └── errors/             # Error message examples (3 files)
+│   └── protocol-spec.md        # Complete League Protocol V2 specification
 ├── venv/                        # Virtual environment (gitignored)
 ├── .gitignore                   # Git ignore rules
 ├── README.md                    # This file - comprehensive documentation
@@ -175,25 +184,6 @@ export GEMINI_API_KEY="your-api-key-here"
 ---
 
 ## Quick Start
-
-### Option 1: Automated Launch (Recommended)
-
-```bash
-# Make script executable (first time only)
-chmod +x scripts/start_league.sh
-
-# Launch all components
-./scripts/start_league.sh
-```
-
-This starts:
-- League Manager on port 8000
-- 2 Referees on ports 8001, 8002
-- 4 Players on ports 8101-8104 with different strategies
-
-
-
----
 
 ## League SDK Module
 
@@ -473,35 +463,25 @@ python main.py --league-id league_2025_even_odd
 
 ### Templates for New Agents
 
-The SDK includes templates to jump-start development:
+The repository includes complete, ready-to-use templates demonstrating modular architecture:
 
-**Referee Template** (`agents/referee_template/main.py`):
-```python
-from league_sdk import MCPServer, ConfigLoader, JsonLogger
+**Referee Template** (`agents/referee_template/`):
+- **`main.py`** - Entry point with server setup and initialization
+- **`handlers.py`** - Complete message handling (invitations, parity collection, results)
+- **`game_logic.py`** - Match execution using SDK game rules
+- **`requirements.txt`** - All necessary dependencies
 
-class RefereeAgent(MCPServer):
-    def __init__(self, referee_id):
-        super().__init__(f"referee_{referee_id}", "2.0")
-        self.logger = JsonLogger(referee_id)
-        
-    def setup_tools(self):
-        self.add_tool("start_match", self.start_match, {...})
-        # ... other tools
-```
+**Player Template** (`agents/player_template/`):
+- **`main.py`** - Entry point with server setup and initialization
+- **`handlers.py`** - Complete message handling (registration, game participation, queries)
+- **`strategy.py`** - Multiple strategies (random, deterministic, adaptive, LLM-ready)
+- **`requirements.txt`** - All necessary dependencies
 
-**Player Template** (`agents/player_template/main.py`):
-```python
-from league_sdk import MCPServer, ConfigLoader, JsonLogger
-
-class PlayerAgent(MCPServer):
-    def __init__(self, player_id, strategy):
-        super().__init__(f"player_{player_id}", "2.0")
-        self.strategy = strategy
-        
-    def setup_tools(self):
-        self.add_tool("choose_parity", self.choose_parity, {...})
-        # ... other tools
-```
+Both templates are fully functional and ready to customize with:
+- Your own ports and configuration
+- Custom strategies (for players)
+- Enhanced game logic (for referees)
+- Additional features and capabilities
 
 ---
 
@@ -553,13 +533,19 @@ python main.py --league-id league_2025_even_odd
 
 **Step 3: Run Referees and Players** (in separate terminals)
 
-You can create your own referee and player agents using the templates in `agents/referee_template/` and `agents/player_template/`.
+The templates in `agents/referee_template/` and `agents/player_template/` are complete and ready to use.
 
-For quick testing, you can adapt the templates by:
-1. Copying `agents/referee_template/` to `agents/referee_REF01/`
-2. Copying `agents/player_template/` to `agents/player_P01/`, `agents/player_P02/`, etc.
-3. Configuring each with different strategies and ports
-4. Running each agent in its own terminal
+To create your own agents:
+1. Copy `agents/referee_template/` to `agents/referee_REF01/`
+2. Copy `agents/player_template/` to `agents/player_P01/`, `agents/player_P02/`, etc.
+3. Update each agent's configuration (port, strategy, etc.)
+4. Install dependencies: `cd agents/player_P01 && pip install -r requirements.txt`
+5. Run each agent in its own terminal: `python main.py --player-id P01 --port 8101`
+
+**Template Features:**
+- **Referee**: Full match orchestration with game logic module
+- **Player**: Multiple strategies (random, always_even, always_odd, alternating, adaptive)
+- **Both**: Complete SDK integration, logging, and error handling
 
 ---
 

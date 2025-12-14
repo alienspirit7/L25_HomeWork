@@ -1,0 +1,13 @@
+{
+    "protocol": "league.v2",
+    "message_type": "GAME_INVITATION",
+    "sender": "referee:REF01",
+    "timestamp": "2025-12-15T00:35:00Z",
+    "conversation_id": "conv_match_R1M1",
+    "league_id": "league_2025_even_odd",
+    "match_id": "R1M1",
+    "round_id": 1,
+    "player_id": "P01",
+    "opponent_id": "P02",
+    "game_type": "even_odd"
+}

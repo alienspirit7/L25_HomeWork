@@ -1,0 +1,16 @@
+{
+    "protocol": "league.v2",
+    "message_type": "LEAGUE_ERROR",
+    "sender": "league_manager",
+    "timestamp": "2025-12-15T00:30:15Z",
+    "conversation_id": "conv_error_003",
+    "error_code": "E001",
+    "error_message": "TIMEOUT",
+    "original_message_type": "CHOOSE_PARITY_CALL",
+    "context": {
+        "player_id": "P03",
+        "timeout_seconds": 30,
+        "retry_count": 3,
+        "result": "TECHNICAL_LOSS"
+    }
+}
