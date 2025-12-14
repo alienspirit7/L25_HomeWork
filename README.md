@@ -169,8 +169,13 @@ cd /path/to/L25_HomeWork
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install common dependencies
 pip install -r requirements.txt
+
+# Install the league SDK
+cd SHARED
+pip install -e .
+cd ..
 ```
 
 ### Optional: LLM Strategy
@@ -502,7 +507,10 @@ cd /path/to/L25_HomeWork
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install SDK
+# Install common dependencies
+pip install -r requirements.txt
+
+# Install the league SDK
 cd SHARED
 pip install -e .
 cd ..
