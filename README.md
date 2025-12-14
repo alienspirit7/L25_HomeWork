@@ -26,40 +26,69 @@ This project demonstrates AI agent architecture through a functional game league
 
 ## Repository Schema
 
+The repository follows a modern modular architecture using the `league_sdk` for all shared functionality.
+
 ```
-even_odd_league/
-├── src/                          # Source code
-│   ├── league_manager.py        # League orchestration (145 lines)
-│   ├── referee.py               # Match execution (148 lines)
-│   ├── player_agent.py          # Player implementation (147 lines)
-│   ├── game_rules/
-│   │   ├── __init__.py
-│   │   └── even_odd.py          # Even/Odd game logic (85 lines)
-│   └── utils/
-│       ├── __init__.py
-│       ├── mcp_server.py        # MCP server base class (95 lines)
-│       ├── mcp_client.py        # MCP client wrapper (76 lines)
-│       ├── schemas.py           # Pydantic models (128 lines)
-│       └── helpers.py           # Utility functions (102 lines)
-├── config/
-│   └── local_config.yaml        # Local testing configuration
-├── scripts/
-│   └── start_league.sh          # Launch script for all components
-├── data/                        # Runtime data (auto-generated)
-│   ├── league_state.json        # Persistent league state
-│   └── match_history.json       # Match audit trail
-├── logs/                        # Log files (auto-generated)
-│   ├── league_manager.log
-│   ├── referee_8001.log
-│   ├── referee_8002.log
-│   └── player_*.log
-├── requirements.txt             # Python dependencies
+L25_HomeWork/
+├── SHARED/                      # Shared resources and SDK
+│   ├── config/                  # JSON configuration files
+│   │   ├── system.json          # System-wide settings (protocol version, etc.)
+│   │   ├── agents.json          # All agent definitions and endpoints
+│   │   ├── league_*.json        # Individual league configurations
+│   │   └── ...
+│   ├── data/                    # Runtime data directories (auto-generated)
+│   │   ├── standings/           # League standings JSON files
+│   │   ├── matches/             # Match history and results
+│   │   └── state/               # Persistent agent state
+│   ├── logs/                    # JSONL structured logs (auto-generated)
+│   │   ├── league_manager/      # League manager logs
+│   │   ├── referees/            # Referee logs by ID
+│   │   └── players/             # Player logs by ID
+│   ├── league_sdk/              # Python SDK for all agents (17 files)
+│   │   ├── __init__.py          # Package exports
+│   │   ├── config_models.py    # Dataclasses for configurations (15 classes)
+│   │   ├── config_loader.py    # Lazy loading with caching
+│   │   ├── repositories.py     # Data access layer (4 repository classes)
+│   │   ├── logger.py           # JSONL structured logging
+│   │   ├── schemas.py          # Protocol V2 Pydantic models
+│   │   ├── helpers.py          # Utility functions (timestamps, IDs, validation)
+│   │   ├── mcp_client.py       # MCP client implementation
+│   │   ├── mcp_server.py       # MCP server base class
+│   │   └── game_rules/         # Game logic modules
+│   │       ├── __init__.py
+│   │       └── even_odd.py     # Even/Odd game implementation
+│   └── pyproject.toml          # SDK packaging configuration
+├── agents/                      # Modular agent implementations
+│   ├── league_manager/          # Modular league manager (Section 11 pattern)
+│   │   ├── main.py             # Entry point with SDK integration (~200 lines)
+│   │   ├── handlers.py         # Message handling logic (~280 lines)
+│   │   ├── scheduler.py        # Round management (~220 lines)
+│   │   └── requirements.txt    # Python dependencies
+│   ├── referee_template/        # Referee template with SDK
+│   │   └── main.py             # Referee example implementation
+│   └── player_template/         # Player template with SDK
+│       └── main.py             # Player example implementation
+├── scripts/                     # Helper scripts
+│   └── (launch scripts can be added here)
+├── doc/                         # Documentation and examples
+│   ├── diagrams/                # Architecture diagrams
+│   └── message-examples/        # Protocol message examples
+├── venv/                        # Virtual environment (gitignored)
 ├── .gitignore                   # Git ignore rules
-├── README.md                    # This file
+├── README.md                    # This file - comprehensive documentation
 ├── PDR_EvenOdd_League.md        # Complete Product Design Review
-├── QUICK_REFERENCE.md           # Quick reference guide
-└── Development_Decisions_and_Missing_Info.md  # Design decisions log
+└── homework_assignment_English_V2.md  # Assignment specification
 ```
+
+### Architecture Benefits
+
+**✅ Modular Design**: Clear separation between SDK, agents, and configuration  
+**✅ Type Safety**: Dataclass-based configuration and Pydantic schemas  
+**✅ Scalability**: Easy to add new agents, leagues, and game types  
+**✅ Maintainability**: SDK changes automatically propagate to all agents  
+**✅ Clean Code**: All agent files under 300 lines
+
+
 
 ---
 
@@ -162,28 +191,375 @@ This starts:
 - 2 Referees on ports 8001, 8002
 - 4 Players on ports 8101-8104 with different strategies
 
-### Option 2: Manual Launch
 
-Open 7 separate terminals:
 
-**Terminal 1 - League Manager:**
+---
+
+## League SDK Module
+
+### Overview
+
+The `league_sdk` is a Python library providing a clean abstraction layer for building league agents. It implements type-safe configuration management, structured logging, data repositories, and MCP protocol utilities.
+
+**Location:** `SHARED/league_sdk/`
+
+### Key Features
+
+- ✅ **Type-Safe Configuration** - Dataclass models for all config types
+- ✅ **Lazy Loading with Caching** - Efficient configuration access
+- ✅ **Repository Pattern** - Clean data access layer for runtime data
+- ✅ **JSONL Structured Logging** - Machine-readable logs with full context
+- ✅ **MCP Protocol Support** - Complete Protocol V2 schemas and client/server
+- ✅ **Pluggable Game Rules** - Easy to add new game types
+- ✅ **Reusable Utilities** - Timestamp generation, ID creation, validation
+
+### Installation
+
 ```bash
-python src/league_manager.py --config config/local_config.yaml
+# From project root
+cd SHARED
+pip install -e .
 ```
 
-**Terminal 2-3 - Referees:**
-```bash
-python src/referee.py --port 8001
-python src/referee.py --port 8002
+This makes `league_sdk` available to all agents:
+```python
+from league_sdk import ConfigLoader, JsonLogger, MCPServer
+from league_sdk.schemas import LeagueRegisterRequest
+from league_sdk.helpers import generate_utc_timestamp
 ```
 
-**Terminal 4-7 - Players:**
-```bash
-python src/player_agent.py --port 8101 --strategy random --name "Alpha"
-python src/player_agent.py --port 8102 --strategy always_even --name "Beta"
-python src/player_agent.py --port 8103 --strategy always_odd --name "Gamma"
-python src/player_agent.py --port 8104 --strategy random --name "Delta"
+### SDK Modules
+
+#### 1. Configuration Management
+
+**`config_models.py`** - 15 dataclasses for type-safe configs:
+```python
+@dataclass
+class SystemConfig:
+    protocol_version: str
+    mcp_version: str
+    retry_policy: RetryPolicy
+
+@dataclass
+class AgentConfig:
+    agent_id: str
+    agent_type: str
+    endpoint: str
+    display_name: str
 ```
+
+**`config_loader.py`** - Centralized configuration loading:
+```python
+from league_sdk import ConfigLoader
+
+loader = ConfigLoader()  # Defaults to SHARED/config/
+
+# Load system configuration
+system = loader.load_system()
+print(system.protocol_version)  # "league.v2"
+
+# Load all agents
+agents = loader.load_agents()
+players = loader.get_active_players()
+
+# Load specific league
+league = loader.load_league("league_2025_even_odd")
+```
+
+#### 2. Structured Logging
+
+**`logger.py`** - JSONL logging with full context:
+```python
+from league_sdk import JsonLogger
+
+logger = JsonLogger("player_01", league_id="league_2025_even_odd")
+
+# Log with structured data
+logger.info("MATCH_STARTED", match_id="R1M1", opponent="P02")
+logger.error("CONNECTION_FAILED", endpoint="http://localhost:8000", retry=3)
+
+# Outputs JSONL:
+# {"timestamp": "2025-12-15T00:30:00Z", "level": "INFO", "event": "MATCH_STARTED", 
+#  "agent_id": "player_01", "league_id": "league_2025_even_odd", "match_id": "R1M1", ...}
+```
+
+#### 3. Data Repositories
+
+**`repositories.py`** - Clean data access layer:
+```python
+from league_sdk import StandingsRepository, MatchRepository
+
+# Standings repository
+standings_repo = StandingsRepository("league_2025_even_odd")
+standings_repo.update_player("P01", result="WIN", points=3)
+current_standings = standings_repo.load()
+
+# Match repository
+match_repo = MatchRepository("league_2025_even_odd")
+match_repo.save_result({
+    "match_id": "R1M1",
+    "winner": "P01",
+    "score": {"P01": "even", "P02": "odd"}
+})
+```
+
+#### 4. MCP Protocol
+
+**`schemas.py`** - Complete Protocol V2 Pydantic models:
+```python
+from league_sdk.schemas import (
+    LeagueRegisterRequest,
+    LeagueRegisterResponse,
+    GameInvitation,
+    ChooseParityCall,
+    # ... all 18 message types
+)
+
+# Type-safe message creation
+request = LeagueRegisterRequest(
+    protocol="league.v2",
+    message_type="LEAGUE_REGISTER_REQUEST",
+    sender="player:P01",
+    display_name="Alpha Bot",
+    agent_version="1.0.0",
+    supported_game_types=["even_odd"]
+)
+```
+
+**`mcp_server.py`** - Base class for MCP servers:
+```python
+from league_sdk import MCPServer
+
+class MyAgent(MCPServer):
+    def __init__(self):
+        super().__init__("my_agent", "1.0.0")
+        
+    def setup_tools(self):
+        self.add_tool("my_tool", self.handle_my_tool, {
+            "type": "object",
+            "properties": {"param": {"type": "string"}},
+            "required": ["param"]
+        })
+        
+    async def handle_my_tool(self, param: str):
+        return {"result": f"Processed: {param}"}
+```
+
+**`mcp_client.py`** - HTTP client for MCP calls:
+```python
+from league_sdk import MCPClient
+
+client = MCPClient("http://localhost:8000/mcp")
+
+# Call tool with retry logic
+result = await client.call_tool(
+    "register_player",
+    {"display_name": "Alpha", "version": "1.0.0"}
+)
+```
+
+#### 5. Utilities
+
+**`helpers.py`** - Common utility functions:
+```python
+from league_sdk.helpers import (
+    generate_utc_timestamp,     # ISO-8601 UTC timestamp
+    generate_player_id,         # Unique player ID
+    generate_auth_token,        # Authentication token
+    validate_parity_choice,     # Check "even" or "odd"
+)
+
+timestamp = generate_utc_timestamp()  # "2025-12-15T00:30:00Z"
+player_id = generate_player_id()      # "P01", "P02", ...
+token = generate_auth_token("P01")    # "tok_P01_xyz..."
+```
+
+### Modular Architecture Pattern
+
+The SDK enables clean separation of concerns. Example from `agents/league_manager/`:
+
+**`main.py`** - Entry point and initialization:
+```python
+from league_sdk import ConfigLoader, JsonLogger, MCPServer
+from handlers import setup_handlers
+from scheduler import RoundScheduler
+
+def main():
+    loader = ConfigLoader()
+    logger = JsonLogger("league_manager")
+    
+    server = MCPServer("league_manager", "2.0")
+    setup_handlers(server, logger)
+    
+    scheduler = RoundScheduler(loader, logger)
+    scheduler.start()
+```
+
+**`handlers.py`** - Message handling logic (280 lines):
+```python
+def setup_handlers(server, logger):
+    server.add_tool("register_player", handle_register_player, {...})
+    server.add_tool("report_match_result", handle_match_result, {...})
+    # ... all handler setup
+
+async def handle_register_player(display_name, version):
+    # Registration logic
+    ...
+```
+
+**`scheduler.py`** - Round management (220 lines):
+```python
+class RoundScheduler:
+    def __init__(self, config_loader, logger):
+        self.config = config_loader.load_league(...)
+        self.logger = logger
+        
+    async def start_round(self, round_id):
+        # Round execution logic
+        ...
+```
+
+### Benefits of SDK Architecture
+
+1. **Code Reusability** - Write once, use in all agents
+2. **Type Safety** - Dataclasses catch errors at development time
+3. **Consistency** - All agents use same config format and logging
+4. **Maintainability** - Changes to SDK automatically propagate to all agents
+5. **Testability** - Mock SDK components for unit testing
+6. **Scalability** - Easy to add new leagues, agents, game types
+
+---
+
+## Modular Agent Architecture
+
+### Section 11 Pattern Implementation
+
+The new `agents/` directory demonstrates the recommended modular pattern for building scalable league agents.
+
+### Example: Modular League Manager
+
+Located in `agents/league_manager/`, this shows how to split a 719-line monolithic file into focused modules:
+
+**File Structure:**
+```
+agents/league_manager/
+├── main.py          # ~200 lines - Entry point, server setup
+├── handlers.py      # ~280 lines - All tool handlers
+├── scheduler.py     # ~220 lines - Round scheduling logic
+└── requirements.txt # Dependencies
+```
+
+**Key Improvements:**
+- ✅ Each file has a single responsibility
+- ✅ All files under 300 lines (easier to understand)
+- ✅ Uses SDK for configuration, logging, utilities
+- ✅ Clean imports and dependencies
+- ✅ Easier to test individual modules
+
+### Running Modular Agents
+
+```bash
+# Install SDK first
+cd SHARED
+pip install -e .
+
+# Install agent dependencies
+cd ../agents/league_manager
+pip install -r requirements.txt
+
+# Run modular league manager
+python main.py --league-id league_2025_even_odd
+```
+
+### Templates for New Agents
+
+The SDK includes templates to jump-start development:
+
+**Referee Template** (`agents/referee_template/main.py`):
+```python
+from league_sdk import MCPServer, ConfigLoader, JsonLogger
+
+class RefereeAgent(MCPServer):
+    def __init__(self, referee_id):
+        super().__init__(f"referee_{referee_id}", "2.0")
+        self.logger = JsonLogger(referee_id)
+        
+    def setup_tools(self):
+        self.add_tool("start_match", self.start_match, {...})
+        # ... other tools
+```
+
+**Player Template** (`agents/player_template/main.py`):
+```python
+from league_sdk import MCPServer, ConfigLoader, JsonLogger
+
+class PlayerAgent(MCPServer):
+    def __init__(self, player_id, strategy):
+        super().__init__(f"player_{player_id}", "2.0")
+        self.strategy = strategy
+        
+    def setup_tools(self):
+        self.add_tool("choose_parity", self.choose_parity, {...})
+        # ... other tools
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+
+### Installation
+
+```bash
+# Navigate to project directory
+cd /path/to/L25_HomeWork
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install SDK
+cd SHARED
+pip install -e .
+cd ..
+```
+
+### Optional: LLM Strategy
+
+For players using Gemini LLM strategy:
+
+```bash
+export GEMINI_API_KEY="your-api-key-here"
+```
+
+### Running the League
+
+**Step 1: Install agent dependencies**
+```bash
+cd agents/league_manager
+pip install -r requirements.txt
+cd ../..
+```
+
+**Step 2: Run League Manager**
+```bash
+cd agents/league_manager
+python main.py --league-id league_2025_even_odd
+```
+
+**Step 3: Run Referees and Players** (in separate terminals)
+
+You can create your own referee and player agents using the templates in `agents/referee_template/` and `agents/player_template/`.
+
+For quick testing, you can adapt the templates by:
+1. Copying `agents/referee_template/` to `agents/referee_REF01/`
+2. Copying `agents/player_template/` to `agents/player_P01/`, `agents/player_P02/`, etc.
+3. Configuring each with different strategies and ports
+4. Running each agent in its own terminal
 
 ---
 
@@ -406,30 +782,21 @@ parity_choice in ["even", "odd"]  # Must be lowercase!
 choice = random.choice(["even", "odd"])
 ```
 
-**Usage:**
-```bash
-python src/player_agent.py --port 8101 --strategy random --name "RandomBot"
-```
+**Usage:** Implement in your player agent based on `agents/player_template/`
 
 ### 2. Always Even
 ```python
 choice = "even"  # Always choose even
 ```
 
-**Usage:**
-```bash
-python src/player_agent.py --port 8102 --strategy always_even --name "EvenBot"
-```
+**Usage:** Implement in your player agent based on `agents/player_template/`
 
 ### 3. Always Odd
 ```python
 choice = "odd"  # Always choose odd
 ```
 
-**Usage:**
-```bash
-python src/player_agent.py --port 8103 --strategy always_odd --name "OddBot"
-```
+**Usage:** Implement in your player agent based on `agents/player_template/`
 
 ### 4. LLM Strategy (Gemini)
 ```python
@@ -438,39 +805,27 @@ choice = gemini_choose(context, history)
 # Falls back to random if API unavailable
 ```
 
-**Usage:**
-```bash
-export GEMINI_API_KEY="your-key"
-python src/player_agent.py --port 8104 --strategy llm --name "GeminiBot"
-```
+**Usage:** Implement in your player agent based on `agents/player_template/` with Gemini API integration
 
 ---
 
 ## Configuration
 
-Edit `config/local_config.yaml`:
+Configuration is managed through JSON files in `SHARED/config/`:
 
-```yaml
-league:
-  league_id: "league_2025_even_odd"
-  game_type: "even_odd"
-  registration_timeout: 60  # Adjust as needed
+- `system.json` - System-wide settings (protocol version, MCP version, retry policy)
+- `agents.json` - All agent definitions and endpoints
+- `league_*.json` - Individual league configurations
 
-agents:
-  league_manager:
-    host: "localhost"
-    port: 8000
-  
-  referees:  # Add more for larger leagues
-    - host: "localhost"
-      port: 8001
-    - host: "localhost"
-      port: 8002
-  
-  players:  # Configure as needed
-    - name: "Agent Alpha"
-      port: 8101
-      strategy: "random"
+**Example league configuration:**
+```json
+{
+  "league_id": "league_2025_even_odd",
+  "game_type": "even_odd",
+  "registration_timeout": 60,
+  "max_players": 100,
+  "rounds": 1
+}
 ```
 
 ### Multi-Machine Deployment
@@ -769,7 +1124,7 @@ Final Score: 7 points (2 wins, 1 draws, 0 losses)
 
 ### Adding a New Game Type
 
-1. Create `src/game_rules/your_game.py`:
+1. Create `SHARED/league_sdk/game_rules/your_game.py`:
 ```python
 class YourGameRules:
     def validate_choice(self, choice):
@@ -781,9 +1136,11 @@ class YourGameRules:
         pass
 ```
 
-2. Update referee to use new rules
+2. Update SDK exports in `SHARED/league_sdk/__init__.py`
 
-3. Update player agents to handle new game messages
+3. Create referee and player agents using the templates in `agents/`
+
+4. Configure new game type in `SHARED/config/` JSON files
 
 ### Scaling to More Players
 
@@ -866,9 +1223,8 @@ Player messages also include:
 
 ## References
 
-- **Full PRD**: [PDR_EvenOdd_League.md](PDR_EvenOdd_League.md)
-- **Quick Reference**: [QUICK_REFERENCE.md](QUICK_REFERENCE.md)
-- **Design Decisions**: [Development_Decisions_and_Missing_Info.md](Development_Decisions_and_Missing_Info.md)
+- **Full Product Design Review**: [PDR_EvenOdd_League.md](PDR_EvenOdd_League.md) - Complete specification and design
+- **Assignment Specification**: [homework_assignment_English_V2.md](homework_assignment_English_V2.md) - Original assignment
 - **MCP Specification**: https://modelcontextprotocol.io/
 - **JSON-RPC 2.0**: https://www.jsonrpc.org/specification
 - **Gemini API**: https://ai.google.dev/
