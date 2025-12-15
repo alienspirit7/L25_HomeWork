@@ -1,0 +1,25 @@
+# Player Agent Dependencies
+# Install with: pip install -r requirements.txt
+
+# Web framework
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# HTTP client
+httpx==0.25.1
+
+# Data validation
+pydantic==2.5.0
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# LLM Support (for AI-powered strategies)
+google-generativeai==0.3.1
+
+# Optional: OpenAI support (uncomment if needed)
+# openai==1.3.5
+
+# League SDK (install from local)
+# Install with: cd ../../SHARED && pip install -e .
+

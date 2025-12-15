@@ -1,0 +1,4 @@
+{"timestamp": "2025-12-15T00:10:56.843457Z", "component": "league_manager", "event_type": "MANAGER_INITIALIZED", "level": "INFO", "league_id": "league_2025_even_odd"}
+{"timestamp": "2025-12-15T00:10:56.853049Z", "component": "league_manager", "event_type": "REGISTRATION_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "timeout_sec": 60}
+{"timestamp": "2025-12-15T00:11:56.854627Z", "component": "league_manager", "event_type": "REGISTRATION_CLOSED", "level": "INFO", "league_id": "league_2025_even_odd", "player_count": 0}
+{"timestamp": "2025-12-15T00:11:56.855628Z", "component": "league_manager", "event_type": "ALL_MATCHES_COMPLETED", "level": "INFO", "league_id": "league_2025_even_odd", "total": 0}
