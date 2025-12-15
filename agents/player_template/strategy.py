@@ -81,10 +81,8 @@ def llm_strategy(match_info: Dict, game_history: list = None) -> str:
     """
     LLM-based strategy: Use language model to make intelligent choice.
     
-    This is a placeholder for LLM integration. Implement using:
-    - Gemini API
-    - OpenAI API
-    - Anthropic Claude API
+    Requires GEMINI_API_KEY environment variable to be set in .env file.
+    Falls back to random strategy if API key is not available.
     
     Args:
         match_info: Current match information
@@ -93,10 +91,31 @@ def llm_strategy(match_info: Dict, game_history: list = None) -> str:
     Returns:
         LLM-suggested choice: "even" or "odd"
     """
-    # TODO: Implement LLM integration
-    # For now, fall back to random
-    logging.info("LLM strategy not yet implemented, using random")
-    return random_strategy()
+    import os
+    
+    # Get API key from environment
+    api_key = os.getenv("GEMINI_API_KEY")
+    
+    if not api_key:
+        logging.warning("GEMINI_API_KEY not found in environment, using random strategy")
+        return random_strategy()
+    
+    try:
+        # TODO: Implement actual Gemini API call
+        # Example using google-generativeai:
+        # import google.generativeai as genai
+        # genai.configure(api_key=api_key)
+        # model = genai.GenerativeModel('gemini-pro')
+        # prompt = f"Choose 'even' or 'odd' for this match: {match_info}"
+        # response = model.generate_content(prompt)
+        # Parse response and return choice
+        
+        logging.info("LLM strategy placeholder - implement with Gemini API")
+        return random_strategy()
+        
+    except Exception as e:
+        logging.error(f"LLM strategy error: {e}, falling back to random")
+        return random_strategy()
 
 
 def adaptive_strategy(

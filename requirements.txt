@@ -11,10 +11,15 @@ httpx==0.25.1
 # Data Validation
 pydantic==2.5.0
 
-# Optional: For LLM-based player strategies
-# Uncomment the line below if you want to use Gemini or OpenAI strategies
-# google-generativeai==0.3.1
+# Environment Variables
+python-dotenv==1.0.0
+
+# LLM Support (for AI-powered player strategies)
+google-generativeai==0.3.1
+
+# Optional: OpenAI support (uncomment if needed)
 # openai==1.3.5
 
 # NOTE: After installing these dependencies, you must also install the league_sdk:
 # cd SHARED && pip install -e .
+

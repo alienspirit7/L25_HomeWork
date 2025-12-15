@@ -516,12 +516,69 @@ pip install -e .
 cd ..
 ```
 
-### Optional: LLM Strategy
+### Setting Up API Keys (For LLM Strategy)
 
-For players using Gemini LLM strategy:
+For players using Gemini LLM strategy, you need to securely configure your API key using a `.env` file.
+
+#### Step 1: Create Your .env File
 
 ```bash
-export GEMINI_API_KEY="your-api-key-here"
+# Copy the example template
+cp .env.example .env
+
+# Edit the .env file with your actual API key
+# Use your preferred editor (nano, vim, code, etc.)
+nano .env
+```
+
+#### Step 2: Add Your Gemini API Key
+
+Edit `.env` and replace the placeholder with your actual key:
+
+```bash
+# Get your API key from: https://makersuite.google.com/app/apikey
+GEMINI_API_KEY=your-actual-gemini-api-key-here
+```
+
+#### Step 3: Verify .env is Gitignored
+
+The `.env` file is already included in `.gitignore`, so it won't be committed to git:
+
+```bash
+# Verify it's ignored
+cat .gitignore | grep .env
+# Should show: .env and .env.local
+```
+
+#### Security Best Practices
+
+✅ **Never commit .env to git** - It's already in .gitignore  
+✅ **Use .env.example for documentation** - Share the template, not actual keys  
+✅ **Rotate keys regularly** - Generate new API keys periodically  
+✅ **Use different keys per environment** - Development vs Production  
+
+#### How It Works
+
+The player template automatically loads environment variables from `.env`:
+
+```python
+# In agents/player_template/main.py
+from dotenv import load_dotenv
+load_dotenv()  # Loads .env file into environment
+
+# Later in strategy.py
+import os
+api_key = os.getenv("GEMINI_API_KEY")  # Securely retrieves key
+```
+
+#### Optional: Install LLM Dependencies
+
+```bash
+# If using Gemini LLM strategy, uncomment in requirements.txt:
+pip install google-generativeai==0.3.1
+
+# Or install directly:
+pip install google-generativeai
 ```
 
 ---
