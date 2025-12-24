@@ -1484,25 +1484,656 @@ Player messages also include:
 
 ---
 
+## Protocol V2 Message Examples
+
+This section provides complete examples of all 18 Protocol V2 message types used in the league system.
+
+### Registration Messages
+
+#### 1. REFEREE_REGISTER_REQUEST
+
+Referees register with the League Manager before judging matches (NEW in Protocol V2).
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "REFEREE_REGISTER_REQUEST",
+  "sender": "referee:pending",
+  "timestamp": "2025-12-24T21:16:10.500Z",
+  "conversation_id": "conv_ref_reg_001",
+  "league_id": "league_2025_even_odd",
+  "referee_meta": {
+    "display_name": "Referee-REF01",
+    "version": "2.1.0",
+    "game_types": ["even_odd"],
+    "contact_endpoint": "http://localhost:8001/mcp",
+    "max_concurrent_matches": 3
+  }
+}
+```
+
+#### 2. REFEREE_REGISTER_RESPONSE
+
+League Manager responds with referee ID and authentication token.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "REFEREE_REGISTER_RESPONSE",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:16:10.501Z",
+  "conversation_id": "conv_ref_reg_001",
+  "league_id": "league_2025_even_odd",
+  "referee_id": "REF01",
+  "auth_token": "tok_ref_REF01_a1b2c3d4e5f6",
+  "status": "ACCEPTED",
+  "reason": null
+}
+```
+
+#### 3. LEAGUE_REGISTER_REQUEST
+
+Players register with the League Manager.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_REGISTER_REQUEST",
+  "sender": "player:pending",
+  "timestamp": "2025-12-24T21:16:12.000Z",
+  "conversation_id": "conv_player_reg_001",
+  "league_id": "league_2025_even_odd",
+  "player_meta": {
+    "display_name": "Player-P01",
+    "protocol_version": "2.1.0",
+    "agent_version": "1.0.0",
+    "game_types": ["even_odd"],
+    "contact_endpoint": "http://localhost:8101/mcp",
+    "strategy": "random"
+  }
+}
+```
+
+#### 4. LEAGUE_REGISTER_RESPONSE
+
+League Manager responds with player ID and authentication token.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_REGISTER_RESPONSE",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:16:12.001Z",
+  "conversation_id": "conv_player_reg_001",
+  "league_id": "league_2025_even_odd",
+  "player_id": "P01",
+  "auth_token": "tok_player_P01_m9n8o7p6q5r4",
+  "status": "ACCEPTED",
+  "reason": null
+}
+```
+
+---
+
+### Game Flow Messages
+
+#### 5. ROUND_ANNOUNCEMENT
+
+League Manager announces the start of a round.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "ROUND_ANNOUNCEMENT",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:17:11.001Z",
+  "league_id": "league_2025_even_odd",
+  "round_id": 1
+}
+```
+
+#### 6. GAME_INVITATION
+
+Referee invites a player to join a match.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "GAME_INVITATION",
+  "sender": "referee:REF01",
+  "auth_token": "tok_ref_REF01_a1b2c3d4e5f6",
+  "timestamp": "2025-12-24T21:17:11.600Z",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "round_id": 1,
+  "player_id": "P01",
+  "opponent_id": "P04",
+  "game_type": "even_odd"
+}
+```
+
+#### 7. GAME_JOIN_ACK
+
+Player acknowledges invitation (simplified - actual implementation auto-accepts).
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "GAME_JOIN_ACK",
+  "sender": "player:P01",
+  "auth_token": "tok_player_P01_m9n8o7p6q5r4",
+  "timestamp": "2025-12-24T21:17:11.700Z",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "player_id": "P01",
+  "status": "READY"
+}
+```
+
+#### 8. CHOOSE_PARITY_CALL
+
+Referee requests player's parity choice.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "CHOOSE_PARITY_CALL",
+  "sender": "referee:REF01",
+  "auth_token": "tok_ref_REF01_a1b2c3d4e5f6",
+  "timestamp": "2025-12-24T21:17:12.000Z",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "player_id": "P01"
+}
+```
+
+#### 9. CHOOSE_PARITY_RESPONSE
+
+Player responds with their choice (must be "even" or "odd").
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "CHOOSE_PARITY_RESPONSE",
+  "sender": "player:P01",
+  "auth_token": "tok_player_P01_m9n8o7p6q5r4",
+  "timestamp": "2025-12-24T21:17:12.100Z",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "player_id": "P01",
+  "parity_choice": "even"
+}
+```
+
+#### 10. GAME_OVER
+
+Referee announces match result to players.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "GAME_OVER",
+  "sender": "referee:REF01",
+  "auth_token": "tok_ref_REF01_a1b2c3d4e5f6",
+  "timestamp": "2025-12-24T21:17:13.000Z",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "player_id": "P01",
+  "winner": "P01",
+  "score": {
+    "P01": "even",
+    "P04": "odd"
+  },
+  "details": {
+    "drawn_number": 4,
+    "parity": "even",
+    "outcome": "PLAYER_A_WIN",
+    "reason": "Player A chose 'even', number was 4 (even)"
+  }
+}
+```
+
+#### 11. MATCH_RESULT_REPORT
+
+Referee reports match result to League Manager.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "MATCH_RESULT_REPORT",
+  "sender": "referee:REF01",
+  "auth_token": "tok_ref_REF01_a1b2c3d4e5f6",
+  "timestamp": "2025-12-24T21:17:13.500Z",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "round_id": 1,
+  "result": {
+    "winner": "P01",
+    "score": {
+      "P01": 3,
+      "P04": 0
+    },
+    "details": {
+      "drawn_number": 4,
+      "parity": "even",
+      "outcome": "PLAYER_A_WIN",
+      "choices": {
+        "P01": "even",
+        "P04": "odd"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Notification Messages
+
+#### 12. STANDINGS_NOTIFICATION
+
+League Manager broadcasts standings to all players after each round.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "STANDINGS_NOTIFICATION",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:17:20.100Z",
+  "league_id": "league_2025_even_odd",
+  "round_id": 1,
+  "standings": [
+    {
+      "rank": 1,
+      "player_id": "P01",
+      "display_name": "Player-P01",
+      "played": 1,
+      "wins": 1,
+      "draws": 0,
+      "losses": 0,
+      "points": 3
+    },
+    {
+      "rank": 2,
+      "player_id": "P03",
+      "display_name": "Player-P03",
+      "played": 1,
+      "wins": 1,
+      "draws": 0,
+      "losses": 0,
+      "points": 3
+    }
+  ]
+}
+```
+
+#### 13. LEAGUE_COMPLETED
+
+League Manager announces final standings and champion.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_COMPLETED",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:18:40.200Z",
+  "league_id": "league_2025_even_odd",
+  "final_standings": [
+    {
+      "rank": 1,
+      "player_id": "P03",
+      "display_name": "Player-P03",
+      "played": 3,
+      "wins": 2,
+      "draws": 1,
+      "losses": 0,
+      "points": 7
+    }
+  ],
+  "champion": {
+    "player_id": "P03",
+    "display_name": "Player-P03",
+    "points": 7
+  }
+}
+```
+
+---
+
+### Query Messages (NEW in Protocol V2)
+
+#### 14. LEAGUE_QUERY - Get Standings
+
+Players can query current standings at any time.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_QUERY",
+  "sender": "player:P01",
+  "auth_token": "tok_player_P01_m9n8o7p6q5r4",
+  "timestamp": "2025-12-24T21:17:25.000Z",
+  "conversation_id": "conv_query_001",
+  "league_id": "league_2025_even_odd",
+  "query_type": "GET_STANDINGS",
+  "query_params": {}
+}
+```
+
+#### 15. LEAGUE_QUERY_RESPONSE
+
+League Manager responds with requested data.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_QUERY_RESPONSE",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:17:25.001Z",
+  "conversation_id": "conv_query_001",
+  "query_type": "GET_STANDINGS",
+  "success": true,
+  "data": {
+    "standings": [
+      {
+        "rank": 1,
+        "player_id": "P01",
+        "display_name": "Player-P01",
+        "played": 1,
+        "wins": 1,
+        "draws": 0,
+        "losses": 0,
+        "points": 3
+      }
+    ]
+  }
+}
+```
+
+**Other Query Types:**
+- `GET_SCHEDULE` - Full match schedule with completion status
+- `GET_NEXT_MATCH` - Find next match for specific player
+- `GET_PLAYER_STATS` - Detailed player statistics
+
+---
+
+### Error Messages
+
+#### 16. LEAGUE_ERROR - Authentication Error
+
+Standardized error response for invalid auth tokens.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_ERROR",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:17:30.000Z",
+  "error_code": "E012",
+  "error_message": "AUTH_TOKEN_INVALID",
+  "original_message_type": "LEAGUE_QUERY",
+  "context": {
+    "sender": "player:P99"
+  }
+}
+```
+
+#### 17. LEAGUE_ERROR - Registration Closed
+
+Error when player tries to register after timeout.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_ERROR",
+  "sender": "league_manager",
+  "timestamp": "2025-12-24T21:18:00.000Z",
+  "error_code": "E018",
+  "error_message": "REGISTRATION_CLOSED",
+  "original_message_type": "LEAGUE_REGISTER_REQUEST",
+  "context": {
+    "registration_deadline": "2025-12-24T21:17:10.000Z",
+    "attempted_at": "2025-12-24T21:18:00.000Z"
+  }
+}
+```
+
+#### 18. LEAGUE_ERROR - Timeout
+
+Error with retry logic applied.
+
+```json
+{
+  "protocol": "league.v2",
+  "message_type": "LEAGUE_ERROR",
+  "sender": "referee:REF01",
+  "timestamp": "2025-12-24T21:17:45.000Z",
+  "error_code": "E001",
+  "error_message": "TIMEOUT",
+  "original_message_type": "CHOOSE_PARITY_CALL",
+  "context": {
+    "player_id": "P02",
+    "timeout_seconds": 30,
+    "retry_count": 3,
+    "action": "TECHNICAL_LOSS"
+  }
+}
+```
+
+**Common Error Codes:**
+- `E000` - Internal server error
+- `E001` - Timeout (retryable)
+- `E003` - Missing required field
+- `E005` - Player not registered
+- `E009` - Connection failed (retryable)
+- `E011` - Auth token missing
+- `E012` - Auth token invalid
+- `E018` - Registration closed / Protocol mismatch
+- `E021` - Non-UTC timestamp
+
+For complete message specifications, see [doc/protocol-spec.md](doc/protocol-spec.md).
+
+---
+
+## Complete League Execution Example
+
+This section demonstrates a complete league execution with **all 7 participants**: 1 League Manager, 2 Referees, and 4 Players.
+
+See the complete detailed execution log with all messages: [doc/logs/complete_league_execution.md](doc/logs/complete_league_execution.md)
+
+### Participants
+
+| ID | Role | Port | Strategy |
+|----|------|------|----------|
+| **league_manager** | Coordinator | 8000 | N/A |
+| **REF01** | Referee | 8001 | Handles R1M1, R2M3, R3M5 |
+| **REF02** | Referee | 8002 | Handles R1M2, R2M4, R3M6 |
+| **P01** | Player | 8101 | random |
+| **P02** | Player | 8102 | always_even |
+| **P03** | Player | 8103 | always_odd |
+| **P04** | Player | 8104 | alternating |
+
+### Execution Timeline Summary
+
+```
+T+0s    → All 7 agents start up
+T+10s   → Registration window opens (60s)
+T+10.5s → REF01 registers
+T+11s   → REF02 registers
+T+12s   → P01 registers (random strategy)
+T+13s   → P02 registers (always_even strategy)
+T+14s   → P03 registers (always_odd strategy)
+T+15s   → P04 registers (alternating strategy)
+T+70s   → Registration closes - 4 players, 2 referees
+T+70.1s → Round-robin schedule created (6 matches, 3 rounds)
+T+71s   → Round 1 starts (R1M1, R1M2 in parallel)
+T+80s   → Round 1 complete - Standings broadcast to all players
+T+81s   → Round 2 starts (R2M3, R2M4 in parallel)
+T+90s   → Round 2 complete - Standings broadcast
+T+91s   → Round 3 starts (R3M5, R3M6 in parallel)
+T+100s  → All matches complete - Final standings calculated
+T+100.2s → LEAGUE_COMPLETED broadcast to all 7 participants
+```
+
+###Complete Match Results
+
+| Match | Round | Players | Referee | Winner | Number | P_A Choice | P_B Choice | Score |
+|-------|-------|---------|---------|--------|--------|------------|------------|-------|
+| R1M1 | 1 | P01 vs P04 | REF01 | P01 | 4 (even) | even | odd | 3-0 |
+| R1M2 | 1 | P02 vs P03 | REF02 | P03 | 7 (odd) | even | odd | 0-3 |
+| R2M3 | 2 | P01 vs P03 | REF01 | P03 | 9 (odd) | even | odd | 0-3 |
+| R2M4 | 2 | P02 vs P04 | REF02 | P02 | 6 (even) | even | odd | 3-0 |
+| R3M5 | 3 | P01 vs P02 | REF01 | P01 | 2 (even) | even | even | 3-0 |
+| R3M6 | 3 | P03 vs P04 | REF02 | **Draw** | 5 (odd) | odd | odd | 1-1 |
+
+### Final Standings
+
+| Rank | Player | Strategy | Played | Won | Drew | Lost | Points |
+|------|--------|----------|--------|-----|------|------|--------|
+| 🥇 1 | **P03** | always_odd | 3 | 2 | 1 | 0 | **7** |
+| 🥈 2 | **P01** | random | 3 | 2 | 0 | 1 | **6** |
+| 🥉 3 | **P02** | always_even | 3 | 1 | 0 | 2 | **3** |
+| 4 | **P04** | alternating | 3 | 0 | 1 | 2 | **1** |
+
+**Champion**: P03 (always_odd strategy) with 7 points
+
+### Key Observations
+
+1. **Parallel Execution**: REF01 and REF02 handled matches simultaneously, reducing total time
+2. **Strategy Performance**: The `always_odd` strategy won this tournament (number distribution favored odd)
+3. **Draw Handling**: R3M6 resulted in a draw when both players chose the same parity
+4. **Complete Protocol V2**: All messages included auth tokens, UTC timestamps, and proper sender formats
+5. **Message Volume**: 184 total messages exchanged across all 7 participants
+6. **Standings Notifications**: All 4 players received standings after each round completion
+
+### Sample Logs from Each Participant
+
+**League Manager** - Registration Complete:
+```json
+{
+  "timestamp": "2025-12-24T21:17:10.000Z",
+  "component": "league_manager",
+  "event_type": "REGISTRATION_CLOSED",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "player_count": 4,
+  "referee_count": 2
+}
+```
+
+**REF01** - Match Execution:
+```json
+{
+  "timestamp": "2025-12-24T21:17:12.200Z",
+  "component": "referee:REF01",
+  "event_type": "CHOICES_COLLECTED",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "choices": {"P01": "even", "P04": "odd"}
+}
+```
+
+**REF02** - Match Completion:
+```json
+{
+  "timestamp": "2025-12-24T21:17:19.100Z",
+  "component": "referee:REF02",
+  "event_type": "MATCH_COMPLETE",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M2",
+  "winner": "P03"
+}
+```
+
+**P01** - Game Result (Won):
+```json
+{
+  "timestamp": "2025-12-24T21:17:13.001Z",
+  "component": "player:P01",
+  "event_type": "GAME_OVER_RECEIVED",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M1",
+  "winner": "P01",
+  "is_winner": true
+}
+```
+
+**P02** - Game Result (Lost):
+```json
+{
+  "timestamp": "2025-12-24T21:17:19.002Z",
+  "component": "player:P02",
+  "event_type": "GAME_OVER_RECEIVED",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R1M2",
+  "winner": "P03",
+  "is_winner": false
+}
+```
+
+**P03** - Standings Received (Leading):
+```json
+{
+  "timestamp": "2025-12-24T21:17:20.200Z",
+  "component": "player:P03",
+  "event_type": "STANDINGS_RECEIVED",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "current_rank": 1,
+  "points": 3
+}
+```
+
+**P04** - Game Result (Draw):
+```json
+{
+  "timestamp": "2025-12-24T21:18:39.002Z",
+  "component": "player:P04",
+  "event_type": "GAME_OVER_RECEIVED",
+  "level": "INFO",
+  "league_id": "league_2025_even_odd",
+  "match_id": "R3M6",
+  "winner": null,
+  "is_draw": true
+}
+```
+
+---
+
+
+
 ## References
+
+### Course Materials
+
+- **Homework Assignment**: "Homework Exercise: Even/Odd League" © Dr. Segal Yoram, 2025, version 2.0
+- Y. Segal, *AI Agents with MCP*. Dr. Yoram Segal, 2025, Hebrew edition.
+
+### Project Documentation
 
 - **Full Product Design Review**: [PDR_EvenOdd_League.md](PDR_EvenOdd_League.md) - Complete specification and design
 - **Assignment Specification**: [homework_assignment_English_V2.md](homework_assignment_English_V2.md) - Original assignment
-- **MCP Specification**: https://modelcontextprotocol.io/
-- **JSON-RPC 2.0**: https://www.jsonrpc.org/specification
+
+### Technical Specifications
+
+- **MCP Specification**: Anthropic, *Model context protocol specification*, 2024. [Online]. Available: https://modelcontextprotocol.io/
+- **JSON-RPC 2.0**: JSON-RPC Working Group, *Json-rpc 2.0 specification*, 2010. [Online]. Available: https://www.jsonrpc.org/specification
+
+### Additional Resources
+
 - **Gemini API**: https://ai.google.dev/
+- K. Stratis, *AI Agents with MCP*. O'Reilly Media, 2025, Early Release.
+
 
 ---
 
 ## License
 
 This project is created for educational purposes as part of AI Agent Development coursework.
-
----
-
-## Author
-
-Created using Gemini AI Assistant as part of Lesson 25 Homework Assignment.
 
 **Version:** 2.0 (League Protocol V2 Compliant)  
 **Date:** December 2025
@@ -1525,16 +2156,4 @@ This Even/Odd AI Agent League demonstrates:
 - ✅ All Python files under 200 lines
 
 Perfect for learning AI agent architecture, MCP protocol, and League Protocol V2! 🚀
-
----
-
-## References
-
-1. Y. Segal, *AI Agents with MCP*. Dr. Yoram Segal, 2025, Hebrew edition.
-
-2. Anthropic, *Model context protocol specification*, 2024. [Online]. Available: https://modelcontextprotocol.io/
-
-3. JSON-RPC Working Group, *Json-rpc 2.0 specification*, 2010. [Online]. Available: https://www.jsonrpc.org/specification
-
-4. K. Stratis, *AI Agents with MCP*. O'Reilly Media, 2025, Early Release.
 

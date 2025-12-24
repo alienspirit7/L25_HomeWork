@@ -1692,3 +1692,10 @@ R3M2: P02 vs P03
 **Document Version:** 1.0  
 **Last Updated:** December 2025  
 **Status:** Ready for Implementation
+
+---
+
+## References
+
+**Homework Assignment**: "Homework Exercise: Even/Odd League" © Dr. Segal Yoram, 2025, version 2.0
+
