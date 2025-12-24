@@ -633,6 +633,8 @@ def choose_parity_llm(context: dict, history: list) -> str:
 
 ## 4. Message Protocol Specifications
 
+> **📖 Complete Message Examples**: For full Protocol V2 message examples with real JSON payloads, auth tokens, and execution context, see [README.md - Protocol V2 Message Examples](README.md#protocol-v2-message-examples) section which includes all 18 message types with complete field documentation.
+
 ### 4.1 Common Message Structure (Protocol V2)
 
 All messages in the league protocol MUST include these base fields:

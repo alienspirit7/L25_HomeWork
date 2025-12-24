@@ -482,7 +482,17 @@ The repository includes complete, ready-to-use templates demonstrating modular a
 - **`strategy.py`** - Multiple strategies (random, deterministic, adaptive, LLM-ready)
 - **`requirements.txt`** - All necessary dependencies
 
-Both templates are fully functional and ready to customize with:
+Both templates are fully functional and **100% Protocol V2 compliant**, including:
+- ✅ **Complete Message Structures** - All required fields per specification
+- ✅ **Authentication** - `auth_token` in all post-registration messages
+- ✅ **Conversation IDs** - Unique `conversation_id` for message tracking
+- ✅ **UTC Timestamps** - Proper ISO 8601 format timestamps
+- ✅ **Context Objects** - Rich context in CHOOSE_PARITY_CALL (opponent, round, standings)
+- ✅ **Deadline Enforcement** - 30-second deadline in parity choice requests
+- ✅ **Role Assignment** - `role_in_match` (PLAYER_A/PLAYER_B) in game invitations
+- ✅ **Structured Results** - Proper `game_result` envelope in GAME_OVER messages
+
+**Customization Ready**:
 - Your own ports and configuration
 - Custom strategies (for players)
 - Enhanced game logic (for referees)

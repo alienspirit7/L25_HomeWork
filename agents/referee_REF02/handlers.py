@@ -177,7 +177,7 @@ class RefereeHandlers:
             "league_id": self.referee.league_id,
             "round_id": round_id,
             "match_id": match_id,
-            "game_type": "even_odd",
+         "game_type": "even_odd",
             "result": result
         }
         
@@ -190,9 +190,8 @@ class RefereeHandlers:
         player_id: str, opponent_id: str
     ) -> dict:
         """Create GAME_INVITATION message."""
-        # Determine role based on player position (simple heuristic)
-        # In practice, this should be passed as parameter
-        role_in_match = "PLAYER_A"  # Could be determined by match setup
+        # Determine role based on player position
+        role_in_match = "PLAYER_A"  # Should be passed as parameter
         
         return {
             "protocol": "league.v2",
@@ -213,7 +212,7 @@ class RefereeHandlers:
         """Create CHOOSE_PARITY_CALL message."""
         from datetime import datetime, timedelta
         
-        # Calculate deadline (30 seconds from now as per spec timeout)
+        # Calculate deadline (30 seconds from now)
         deadline = datetime.utcnow() + timedelta(seconds=30)
         deadline_str = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
         
@@ -229,8 +228,8 @@ class RefereeHandlers:
             "player_id": player_id,
             "game_type": "even_odd",
             "context": {
-                "opponent_id": "",  # Should be passed as parameter
-                "round_id": 0,  # Should be passed as parameter
+                "opponent_id": "",
+                "round_id": 0,
                 "your_standings": {
                     "wins": 0,
                     "losses": 0,
@@ -271,4 +270,3 @@ class RefereeHandlers:
                 "reason": details.get('reason', '')
             }
         }
-
