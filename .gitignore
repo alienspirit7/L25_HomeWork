@@ -1,21 +1,24 @@
-# Python
+# Log files
+*.log
+*.jsonl
+
+# Environment variables
+.env
+.env.local
+
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Virtual environment
 venv/
 env/
 ENV/
 *.egg
 *.egg-info/
-dist/
-build/
-
-# Data and logs (old structure - ignore)
-/data/
-/logs/
-*.log
 
 # Allow SHARED directory structure
 !/SHARED/

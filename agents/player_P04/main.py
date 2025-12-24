@@ -59,6 +59,8 @@ class PlayerAgent:
         # League notifications
         self.mcp_server.register_tool("notify_round", self.notify_round)
         self.mcp_server.register_tool("notify_standings", self.notify_standings)
+        self.mcp_server.register_tool("notify_round_completed", self.notify_round_completed)
+        self.mcp_server.register_tool("notify_league_completed", self.notify_league_completed)
         
         # Game execution tools (from handlers)
         self.mcp_server.register_tool("receive_game_invitation", self.handlers.receive_game_invitation)
@@ -76,7 +78,18 @@ class PlayerAgent:
         standings = args.get('standings', [])
         self.logger.info("STANDINGS_RECEIVED", count=len(standings))
         return {"status": "ACK"}
-
+    
+    async def notify_round_completed(self, args: dict) -> dict:
+        """Handle round completed notification."""
+        round_id = args.get('round_id')
+        self.logger.info("ROUND_COMPLETED", round_id=round_id)
+        return {"status": "ACK"}
+    
+    async def notify_league_completed(self, args: dict) -> dict:
+        """Handle league completed notification."""
+        champion = args.get('champion', {})
+        self.logger.info("LEAGUE_COMPLETED", champion=champion.get('player_id'))
+        return {"status": "ACK"}
     
     async def register_with_league(self):
         """Register this player with the league manager."""

@@ -5,52 +5,128 @@
       "player_id": "P01",
       "display_name": "Player-P01",
       "endpoint": "http://localhost:8101/mcp",
-      "registered_at": "2025-12-24T20:42:35Z"
+      "registered_at": "2025-12-24T21:21:37Z"
     },
     "P02": {
       "player_id": "P02",
       "display_name": "Player-P02",
       "endpoint": "http://localhost:8102/mcp",
-      "registered_at": "2025-12-24T20:42:38Z"
+      "registered_at": "2025-12-24T21:21:39Z"
     },
     "P03": {
       "player_id": "P03",
       "display_name": "Player-P03",
       "endpoint": "http://localhost:8103/mcp",
-      "registered_at": "2025-12-24T20:42:41Z"
+      "registered_at": "2025-12-24T21:21:42Z"
     },
     "P04": {
       "player_id": "P04",
       "display_name": "Player-P04",
       "endpoint": "http://localhost:8104/mcp",
-      "registered_at": "2025-12-24T20:42:43Z"
+      "registered_at": "2025-12-24T21:21:44Z"
     }
   },
   "results": {
     "R1M1": {
       "winner": "P04",
       "score": {
-        "P01": "even",
-        "P04": "odd"
+        "P01": 0,
+        "P04": 3
       },
       "details": {
-        "drawn_number": 7,
+        "drawn_number": 3,
         "parity": "odd",
         "outcome": "PLAYER_B_WIN",
-        "reason": "Player B chose 'odd', number was 7 (odd)"
+        "reason": "Player B chose 'odd', number was 3 (odd)",
+        "choices": {
+          "P01": "even",
+          "P04": "odd"
+        }
       }
     },
     "R1M2": {
-      "winner": "P02",
+      "winner": "P03",
       "score": {
-        "P02": "even",
-        "P03": "odd"
+        "P02": 0,
+        "P03": 3
       },
       "details": {
-        "drawn_number": 4,
+        "drawn_number": 5,
+        "parity": "odd",
+        "outcome": "PLAYER_B_WIN",
+        "reason": "Player B chose 'odd', number was 5 (odd)",
+        "choices": {
+          "P02": "even",
+          "P03": "odd"
+        }
+      }
+    },
+    "R2M3": {
+      "winner": "P01",
+      "score": {
+        "P01": 3,
+        "P03": 0
+      },
+      "details": {
+        "drawn_number": 10,
         "parity": "even",
         "outcome": "PLAYER_A_WIN",
-        "reason": "Player A chose 'even', number was 4 (even)"
+        "reason": "Player A chose 'even', number was 10 (even)",
+        "choices": {
+          "P01": "even",
+          "P03": "odd"
+        }
+      }
+    },
+    "R2M4": {
+      "winner": "P02",
+      "score": {
+        "P04": 0,
+        "P02": 3
+      },
+      "details": {
+        "drawn_number": 1,
+        "parity": "odd",
+        "outcome": "PLAYER_B_WIN",
+        "reason": "Player B chose 'odd', number was 1 (odd)",
+        "choices": {
+          "P04": "even",
+          "P02": "odd"
+        }
+      }
+    },
+    "R3M5": {
+      "winner": "P01",
+      "score": {
+        "P01": 3,
+        "P02": 0
+      },
+      "details": {
+        "drawn_number": 6,
+        "parity": "even",
+        "outcome": "PLAYER_A_WIN",
+        "reason": "Player A chose 'even', number was 6 (even)",
+        "choices": {
+          "P01": "even",
+          "P02": "odd"
+        }
+      }
+    },
+    "R3M6": {
+      "winner": "P03",
+      "score": {
+        "P03": 3,
+        "P04": 0
+      },
+      "details": {
+        "drawn_number": 10,
+        "parity": "even",
+        "outcome": "PLAYER_A_WIN",
+        "reason": "Player A chose 'even', number was 10 (even)",
+        "choices": {
+          "P03": "even",
+          "P04": "odd"
+        }
       }
     }
   },

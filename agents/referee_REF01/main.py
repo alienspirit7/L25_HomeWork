@@ -60,6 +60,14 @@ class RefereeAgent:
         """Register MCP tools."""
         # Use handler's start_match which has full match execution logic
         self.mcp_server.register_tool("start_match", self.handlers.start_match)
+        # League notifications
+        self.mcp_server.register_tool("notify_league_completed", self.notify_league_completed)
+    
+    async def notify_league_completed(self, args: dict) -> dict:
+        """Handle league completed notification."""
+        champion = args.get('champion', {})
+        self.logger.info("LEAGUE_COMPLETED", champion=champion.get('player_id'))
+        return {"status": "ACK"}
     
     async def register_with_league(self):
         """Register this referee with the league manager."""
@@ -77,7 +85,7 @@ class RefereeAgent:
                 self.league_manager_url,
                 "register_referee",
                 {"referee_meta": referee_meta}
-            )
+)
             
             # Parse MCP response wrapper
             if 'content' in response and len(response['content']) > 0:
