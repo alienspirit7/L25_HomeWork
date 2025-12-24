@@ -1,59 +1,24 @@
-"""
-Configuration loader implementing lazy loading pattern with caching.
-
-Provides convenient access to all configuration files with automatic caching
-and helper methods for searching specific agents.
-"""
-
+"""Configuration loader with lazy loading and caching."""
 import json
 from pathlib import Path
 from typing import Dict, Optional
 from .config_models import (
-    SystemConfig,
-    NetworkConfig,
-    SecurityConfig,
-    TimeoutsConfig,
-    AgentsConfig,
-    RefereeConfig,
-    PlayerConfig,
-    LeagueConfig,
-    ScoringConfig,
-    ScheduleConfig,
-    ParticipantsConfig,
-    LeagueSettings,
-    GamesRegistry,
-    GameTypeConfig,
+    SystemConfig, NetworkConfig, SecurityConfig, TimeoutsConfig,
+    AgentsConfig, RefereeConfig, PlayerConfig, LeagueConfig,
+    ScoringConfig, ScheduleConfig, ParticipantsConfig, LeagueSettings,
+    GamesRegistry, GameTypeConfig,
 )
 
-
-# Default paths - can be overridden
 DEFAULT_SHARED_ROOT = Path(__file__).parent.parent
 CONFIG_ROOT = DEFAULT_SHARED_ROOT / "config"
 DATA_ROOT = DEFAULT_SHARED_ROOT / "data"
 LOG_ROOT = DEFAULT_SHARED_ROOT / "logs"
 
-
 class ConfigLoader:
-    """
-    Lazy-loading configuration loader with caching.
-    
-    Loads configuration files only when needed and caches them for
-    repeated access. Provides helper methods for searching specific agents.
-    """
+    """Lazy-loading configuration loader with caching."""
     
     def __init__(self, shared_root: Optional[Path] = None):
-        """
-        Initialize the config loader.
-        
-        Args:
-            shared_root: Path to SHARED directory. If None, uses default.
-        """
-        if shared_root:
-            self.root = Path(shared_root) / "config"
-        else:
-            self.root = CONFIG_ROOT
-            
-        # Lazy caches
+        self.root = Path(shared_root) / "config" if shared_root else CONFIG_ROOT
         self._system: Optional[SystemConfig] = None
         self._agents: Optional[AgentsConfig] = None
         self._leagues: Dict[str, LeagueConfig] = {}
@@ -63,11 +28,9 @@ class ConfigLoader:
         """Load global system configuration."""
         if self._system:
             return self._system
-        
         path = self.root / "system.json"
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-        
         self._system = SystemConfig(
             schema_version=data["schema_version"],
             system_id=data["system_id"],
@@ -84,14 +47,11 @@ class ConfigLoader:
         """Load all agents configuration."""
         if self._agents:
             return self._agents
-        
         path = self.root / "agents" / "agents_config.json"
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-        
         referees = [RefereeConfig(**ref) for ref in data.get("referees", [])]
         players = [PlayerConfig(**player) for player in data.get("players", [])]
-        
         self._agents = AgentsConfig(
             schema_version=data["schema_version"],
             last_updated=data["last_updated"],
@@ -104,11 +64,9 @@ class ConfigLoader:
         """Load specific league configuration."""
         if league_id in self._leagues:
             return self._leagues[league_id]
-        
         path = self.root / "leagues" / f"{league_id}.json"
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-        
         league = LeagueConfig(
             schema_version=data["schema_version"],
             league_id=data["league_id"],
@@ -127,13 +85,10 @@ class ConfigLoader:
         """Load games registry."""
         if self._games:
             return self._games
-        
         path = self.root / "games" / "games_registry.json"
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-        
         games = [GameTypeConfig(**game) for game in data["games"]]
-        
         self._games = GamesRegistry(
             schema_version=data["schema_version"],
             last_updated=data["last_updated"],
@@ -159,10 +114,8 @@ class ConfigLoader:
     
     def get_active_referees(self) -> list[RefereeConfig]:
         """Get all active referees."""
-        agents = self.load_agents()
-        return [ref for ref in agents.referees if ref.active]
+        return [ref for ref in self.load_agents().referees if ref.active]
     
     def get_active_players(self) -> list[PlayerConfig]:
         """Get all active players."""
-        agents = self.load_agents()
-        return [player for player in agents.players if player.active]
+        return [player for player in self.load_agents().players if player.active]

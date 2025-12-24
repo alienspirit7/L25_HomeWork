@@ -20,7 +20,7 @@ This project demonstrates AI agent architecture through a functional game league
 - ✅ **Multiple Strategies** - Random, deterministic, and LLM-based player strategies
 - ✅ **Round Standings Notifications** - Real-time standings updates after each round
 - ✅ **Comprehensive Logging** - All messages logged to files with full JSON visibility
-- ✅ **Clean Modular Code** - All Python files under 200 lines
+- ✅ **Clean Modular Code** - Majority of Python files under 150 lines
 
 ---
 
@@ -95,7 +95,7 @@ L25_HomeWork/
 **✅ Type Safety**: Dataclass-based configuration and Pydantic schemas  
 **✅ Scalability**: Easy to add new agents, leagues, and game types  
 **✅ Maintainability**: SDK changes automatically propagate to all agents  
-**✅ Clean Code**: All agent files under 300 lines
+**✅ Clean Code**: Majority of files under 150 lines for easier reading
 
 
 
@@ -446,7 +446,7 @@ agents/league_manager/
 
 **Key Improvements:**
 - ✅ Each file has a single responsibility
-- ✅ All files under 300 lines (easier to understand)
+- ✅ Majority of files under 150 lines (easier to understand)
 - ✅ Uses SDK for configuration, logging, utilities
 - ✅ Clean imports and dependencies
 - ✅ Easier to test individual modules
@@ -2163,7 +2163,7 @@ This Even/Odd AI Agent League demonstrates:
 - ✅ Round-by-round standings notifications
 - ✅ Comprehensive logging with JSON message visibility
 - ✅ Clean, modular code architecture
-- ✅ All Python files under 200 lines
+- ✅ Majority of Python files under 150 lines (60% of codebase)
 
 Perfect for learning AI agent architecture, MCP protocol, and League Protocol V2! 🚀
 

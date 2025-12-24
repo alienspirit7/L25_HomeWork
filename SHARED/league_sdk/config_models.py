@@ -1,12 +1,6 @@
-"""
-Configuration dataclass models for the League SDK.
-
-These models provide type-safe access to configuration data loaded from JSON files.
-"""
-
+"""Configuration dataclass models for the League SDK."""
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
-
 
 @dataclass
 class NetworkConfig:
@@ -16,14 +10,12 @@ class NetworkConfig:
     default_referee_port_range: List[int]
     default_player_port_range: List[int]
 
-
 @dataclass
 class SecurityConfig:
     """Security and authentication settings."""
     enable_auth_tokens: bool
     token_length: int
     token_ttl_hours: int
-
 
 @dataclass
 class TimeoutsConfig:
@@ -33,7 +25,6 @@ class TimeoutsConfig:
     game_join_ack_timeout_sec: int
     move_timeout_sec: int
     generic_response_timeout_sec: int
-
 
 @dataclass
 class SystemConfig:
@@ -47,7 +38,6 @@ class SystemConfig:
     timeouts: TimeoutsConfig
     defaults: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class RefereeConfig:
     """Referee agent configuration."""
@@ -59,7 +49,6 @@ class RefereeConfig:
     max_concurrent_matches: int
     active: bool = True
     settings: Dict[str, Any] = field(default_factory=dict)
-
 
 @dataclass
 class PlayerConfig:
@@ -74,7 +63,6 @@ class PlayerConfig:
     active: bool = True
     settings: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class AgentsConfig:
     """Configuration for all agents in the system."""
@@ -82,7 +70,6 @@ class AgentsConfig:
     last_updated: str
     referees: List[RefereeConfig]
     players: List[PlayerConfig]
-
 
 @dataclass
 class ScoringConfig:
@@ -93,14 +80,12 @@ class ScoringConfig:
     technical_loss_points: int
     tiebreakers: List[str]
 
-
 @dataclass
 class ScheduleConfig:
     """League scheduling configuration."""
     format: str  # e.g., "round_robin"
     rounds_per_matchup: int
     parallel_matches: bool
-
 
 @dataclass
 class ParticipantsConfig:
@@ -109,14 +94,12 @@ class ParticipantsConfig:
     max_players: int
     registered_players: List[str] = field(default_factory=list)
 
-
 @dataclass
 class LeagueSettings:
     """League-specific settings."""
     registration_timeout_sec: int
     auto_start_when_ready: bool
     publish_standings_after_round: bool
-
 
 @dataclass
 class LeagueConfig:
@@ -131,7 +114,6 @@ class LeagueConfig:
     participants: ParticipantsConfig
     settings: LeagueSettings
 
-
 @dataclass
 class GameTypeConfig:
     """Game type definition."""
@@ -144,7 +126,6 @@ class GameTypeConfig:
     rules_reference: str
     valid_moves: List[str]
     outcomes: List[str]
-
 
 @dataclass
 class GamesRegistry:
