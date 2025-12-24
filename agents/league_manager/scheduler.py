@@ -82,7 +82,7 @@ class LeagueScheduler:
         if not round_info:
             return
         
-        round_info['completed'] += 1
+        round_info['completed'] = int(round_info.get('completed', 0)) + 1
         
         # Check if all matches complete
         if round_info['completed'] >= len(round_info['matches']):

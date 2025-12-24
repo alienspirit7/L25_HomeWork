@@ -1,0 +1,48 @@
+{"timestamp": "2025-12-15T00:14:26.927854Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:17:14.355272Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:20:30.895227Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:31:25.575898Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:31:41.081077Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:33:10.643460Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:38:48.846605Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-15T00:38:48.856877Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-15T00:39:45.158909Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1"}
+{"timestamp": "2025-12-15T00:39:45.172820Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R2M3"}
+{"timestamp": "2025-12-15T00:39:45.183678Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R3M5"}
+{"timestamp": "2025-12-24T20:00:53.458291Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:00:53.468855Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:01:35.981153Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1"}
+{"timestamp": "2025-12-24T20:01:35.993908Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R2M3"}
+{"timestamp": "2025-12-24T20:01:36.004426Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R3M5"}
+{"timestamp": "2025-12-24T20:20:44.298514Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:20:44.309186Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:21:37.502310Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1"}
+{"timestamp": "2025-12-24T20:21:37.515296Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R2M3"}
+{"timestamp": "2025-12-24T20:21:37.526261Z", "component": "referee:REF01", "event_type": "MATCH_STARTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R3M5"}
+{"timestamp": "2025-12-24T20:28:52.082841Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:28:52.095659Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:30:36.172482Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:30:36.184748Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:32:10.076310Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:32:10.088499Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:33:07.895915Z", "component": "referee:REF01", "event_type": "MATCH_START", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "round_id": 1, "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:33:07.902257Z", "component": "referee:REF01", "event_type": "INVITATIONS_SENT", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:33:07.907686Z", "component": "referee:REF01", "event_type": "CHOICES_COLLECTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "choices": {"P01": "even", "P04": "odd"}}
+{"timestamp": "2025-12-24T20:36:35.542633Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:36:35.554840Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:37:34.407064Z", "component": "referee:REF01", "event_type": "MATCH_START", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "round_id": 1, "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:37:34.413457Z", "component": "referee:REF01", "event_type": "INVITATIONS_SENT", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:37:34.417446Z", "component": "referee:REF01", "event_type": "CHOICES_COLLECTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "choices": {"P01": "even", "P04": "odd"}}
+{"timestamp": "2025-12-24T20:37:34.424946Z", "component": "referee:REF01", "event_type": "MATCH_COMPLETE", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "winner": "P01"}
+{"timestamp": "2025-12-24T20:39:56.057931Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:39:56.071016Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:40:55.254926Z", "component": "referee:REF01", "event_type": "MATCH_START", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "round_id": 1, "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:40:55.260894Z", "component": "referee:REF01", "event_type": "INVITATIONS_SENT", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:40:55.264518Z", "component": "referee:REF01", "event_type": "CHOICES_COLLECTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "choices": {"P01": "even", "P04": "odd"}}
+{"timestamp": "2025-12-24T20:40:55.270304Z", "component": "referee:REF01", "event_type": "MATCH_COMPLETE", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "winner": "P01"}
+{"timestamp": "2025-12-24T20:42:29.546742Z", "component": "referee:REF01", "event_type": "REFEREE_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "referee_id": "REF01"}
+{"timestamp": "2025-12-24T20:42:29.559494Z", "component": "referee:REF01", "event_type": "REFEREE_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:43:26.237759Z", "component": "referee:REF01", "event_type": "MATCH_START", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "round_id": 1, "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:43:26.243761Z", "component": "referee:REF01", "event_type": "INVITATIONS_SENT", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "players": ["P01", "P04"]}
+{"timestamp": "2025-12-24T20:43:26.248404Z", "component": "referee:REF01", "event_type": "CHOICES_COLLECTED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "choices": {"P01": "even", "P04": "odd"}}
+{"timestamp": "2025-12-24T20:43:26.254247Z", "component": "referee:REF01", "event_type": "MATCH_COMPLETE", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M1", "winner": "P04"}

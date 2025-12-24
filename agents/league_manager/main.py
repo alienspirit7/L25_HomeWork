@@ -160,13 +160,25 @@ class LeagueManager:
     def _group_matches_by_round(self):
         """Group schedule matches by round."""
         rounds_matches = {}
+        
+        # Get list of registered referee endpoints
+        registered_referee_endpoints = [
+            ref_info['endpoint'] for ref_info in self.referees.values()
+        ]
+        
+        # Fallback to config if no referees registered
+        if not registered_referee_endpoints:
+            registered_referee_endpoints = self.referee_endpoints
+        
+        referee_index = 0
+        
         for player_A, player_B, round_id, match_num in self.schedule:
             if round_id not in rounds_matches:
                 rounds_matches[round_id] = []
             
             match_id = f"R{round_id}M{match_num}"
-            referee_endpoint = self.referee_endpoints[self.referee_index]
-            self.referee_index = (self.referee_index + 1) % len(self.referee_endpoints)
+            referee_endpoint = registered_referee_endpoints[referee_index]
+            referee_index = (referee_index + 1) % len(registered_referee_endpoints)
             
             rounds_matches[round_id].append({
                 "match_id": match_id,
@@ -268,10 +280,18 @@ async def main():
     )
     server = uvicorn.Server(uvicorn_config)
     
+    # Define a wrapper to delay league start
+    async def delayed_league_start():
+        """Wait for server to be ready, then start league workflow."""
+        # Give server time to fully start up
+        await asyncio.sleep(2)
+        logging.info("Server ready - starting league workflow")
+        await manager.run_league()
+    
     # Run both server and league manager concurrently
     await asyncio.gather(
         server.serve(),
-        manager.run_league()
+        delayed_league_start()
     )
 
 

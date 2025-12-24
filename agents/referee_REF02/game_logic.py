@@ -24,7 +24,7 @@ def execute_match(
         player_B_id: Second player ID
         choice_A: Player A's parity choice ("even" or "odd")
         choice_B: Player B's parity choice ("even" or "odd")
-        game: EvenOddGame instance from league_sdk
+        game: EvenOddRules instance from league_sdk
     
     Returns:
         {
@@ -51,13 +51,18 @@ def execute_match(
     # Draw random number using game rules
     drawn_number = game.draw_number()
     
-    # Determine winner
-    winner = game.determine_winner(
-        {player_A_id: choice_A, player_B_id: choice_B},
-        drawn_number
-    )
+    # Determine winner (EvenOddRules expects choice_A, choice_B, drawn_number)
+    winner_result, reason = game.determine_winner(choice_A, choice_B, drawn_number)
     
-    # Determine parity of drawn number
+    # Map PLAYER_A/PLAYER_B to actual player IDs
+    if winner_result == "PLAYER_A":
+        winner = player_A_id
+    elif winner_result == "PLAYER_B":
+        winner = player_B_id
+    else:
+        winner = None  # Draw
+    
+    # Determine parity of drawn_number
     parity = "even" if drawn_number % 2 == 0 else "odd"
     
     # Determine outcome type
@@ -68,16 +73,35 @@ def execute_match(
     else:
         outcome = "PLAYER_B_WIN"
     
+    # Calculate points based on outcome (3 for win, 1 for draw, 0 for loss)
+    if winner is None:
+        # Draw - both get 1 point
+        player_A_points = 1
+        player_B_points = 1
+    elif winner == player_A_id:
+        # Player A wins
+        player_A_points = 3
+        player_B_points = 0
+    else:
+        # Player B wins
+        player_A_points = 0
+        player_B_points = 3
+    
     result = {
         "winner": winner,
         "score": {
-            player_A_id: choice_A,
-            player_B_id: choice_B
+            player_A_id: player_A_points,
+            player_B_id: player_B_points
         },
         "details": {
             "drawn_number": drawn_number,
             "parity": parity,
-            "outcome": outcome
+            "outcome": outcome,
+            "reason": reason,
+            "choices": {
+                player_A_id: choice_A,
+                player_B_id: choice_B
+            }
         }
     }
     

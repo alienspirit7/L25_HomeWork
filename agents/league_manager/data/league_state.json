@@ -1,0 +1,95 @@
+{
+  "league_id": "league_2025_even_odd",
+  "players": {
+    "P01": {
+      "player_id": "P01",
+      "display_name": "Player-P01",
+      "endpoint": "http://localhost:8101/mcp",
+      "registered_at": "2025-12-24T20:42:35Z"
+    },
+    "P02": {
+      "player_id": "P02",
+      "display_name": "Player-P02",
+      "endpoint": "http://localhost:8102/mcp",
+      "registered_at": "2025-12-24T20:42:38Z"
+    },
+    "P03": {
+      "player_id": "P03",
+      "display_name": "Player-P03",
+      "endpoint": "http://localhost:8103/mcp",
+      "registered_at": "2025-12-24T20:42:41Z"
+    },
+    "P04": {
+      "player_id": "P04",
+      "display_name": "Player-P04",
+      "endpoint": "http://localhost:8104/mcp",
+      "registered_at": "2025-12-24T20:42:43Z"
+    }
+  },
+  "results": {
+    "R1M1": {
+      "winner": "P04",
+      "score": {
+        "P01": "even",
+        "P04": "odd"
+      },
+      "details": {
+        "drawn_number": 7,
+        "parity": "odd",
+        "outcome": "PLAYER_B_WIN",
+        "reason": "Player B chose 'odd', number was 7 (odd)"
+      }
+    },
+    "R1M2": {
+      "winner": "P02",
+      "score": {
+        "P02": "even",
+        "P03": "odd"
+      },
+      "details": {
+        "drawn_number": 4,
+        "parity": "even",
+        "outcome": "PLAYER_A_WIN",
+        "reason": "Player A chose 'even', number was 4 (even)"
+      }
+    }
+  },
+  "schedule": [
+    [
+      "P01",
+      "P04",
+      1,
+      1
+    ],
+    [
+      "P02",
+      "P03",
+      1,
+      2
+    ],
+    [
+      "P01",
+      "P03",
+      2,
+      3
+    ],
+    [
+      "P04",
+      "P02",
+      2,
+      4
+    ],
+    [
+      "P01",
+      "P02",
+      3,
+      5
+    ],
+    [
+      "P03",
+      "P04",
+      3,
+      6
+    ]
+  ]
+}

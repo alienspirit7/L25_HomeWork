@@ -126,36 +126,50 @@ class PlayerHandlers:
     async def receive_game_over(self, args: dict) -> dict:
         """
         Handle GAME_OVER message from referee.
-        
+
         Args:
-            args: Game over message with results
-        
+            args: Game over message with new game_result structure.
+
         Returns:
-            {'status': 'ACK'}
+            {'status': 'ACK', 'received': True}
         """
         match_id = args.get('match_id')
-        winner = args.get('winner')
-        score = args.get('score', {})
-        details = args.get('details', {})
+        game_result = args.get('game_result', {})
         
-        # Determine if we won
-        is_winner = winner == self.player.player_id
-        is_draw = winner is None
+        # Extract result from new game_result structure
+        status = game_result.get('status')  # "WIN", "DRAW", "TECHNICAL_LOSS"
+        winner_player_id = game_result.get('winner_player_id')
+        drawn_number = game_result.get('drawn_number')
+        choices = game_result.get('choices', {})
+        reason = game_result.get('reason', '')
+        
+        # Determine if this player won
+        won = (winner_player_id == self.player.player_id)
+        is_draw = (status == "DRAW")
         
         self.player.logger.info(
             "GAME_OVER_RECEIVED",
             match_id=match_id,
-            winner=winner,
-            is_winner=is_winner,
+            status=status,
+            winner=winner_player_id,
+            won=won,
             is_draw=is_draw,
-            score=score,
-            details=details
+            drawn_number=drawn_number,
+            reason=reason
         )
+        
+        # Update internal stats (optional)
+        if won:
+            logging.info(f"Player {self.player.player_id} WON match {match_id}")
+        elif is_draw:
+            logging.info(f"Player {self.player.player_id} DREW match {match_id}")
+        else:
+            logging.info(f"Player {self.player.player_id} LOST match {match_id}")
         
         # Clear current match
         self.player.current_match = None
         
-        return {"status": "ACK"}
+        return {"status": "ACK", "received": True}
     
     async def notify_round(self, args: dict) -> dict:
         """

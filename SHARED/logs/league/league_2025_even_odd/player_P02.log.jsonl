@@ -1,0 +1,42 @@
+{"timestamp": "2025-12-15T00:20:57.172133Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-15T00:33:26.297355Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-15T00:34:06.998257Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-15T00:39:08.385739Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-15T00:39:08.398616Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-15T00:39:45.147295Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-15T00:39:45.166965Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 2}
+{"timestamp": "2025-12-15T00:39:45.178415Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 3}
+{"timestamp": "2025-12-24T20:01:09.646301Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:01:09.659553Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:01:35.971482Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:01:35.988051Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 2}
+{"timestamp": "2025-12-24T20:01:35.999523Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 3}
+{"timestamp": "2025-12-24T20:20:57.757140Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:20:57.771218Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:21:37.489304Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:21:37.510132Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 2}
+{"timestamp": "2025-12-24T20:21:37.521265Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 3}
+{"timestamp": "2025-12-24T20:28:52.084277Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:28:52.101440Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:29:49.117932Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:32:19.254465Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:32:19.268918Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:33:07.884119Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:36:43.210625Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:36:43.225506Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:37:34.395132Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:37:34.430751Z", "component": "player:P02", "event_type": "GAME_INVITATION_RECEIVED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "opponent_id": "P03"}
+{"timestamp": "2025-12-24T20:37:34.435424Z", "component": "player:P02", "event_type": "PARITY_CHOICE_MADE", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "choice": "even"}
+{"timestamp": "2025-12-24T20:37:34.440234Z", "component": "player:P02", "event_type": "GAME_OVER_RECEIVED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "winner": "P02", "is_winner": true, "is_draw": false, "score": {"P02": "even", "P03": "odd"}, "details": {"drawn_number": 4, "parity": "even", "outcome": "PLAYER_A_WIN", "reason": "Player A chose 'even', number was 4 (even)"}}
+{"timestamp": "2025-12-24T20:40:04.192296Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:40:04.207238Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:40:55.242397Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:40:55.274774Z", "component": "player:P02", "event_type": "GAME_INVITATION_RECEIVED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "opponent_id": "P03"}
+{"timestamp": "2025-12-24T20:40:55.278865Z", "component": "player:P02", "event_type": "PARITY_CHOICE_MADE", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "choice": "even"}
+{"timestamp": "2025-12-24T20:40:55.282325Z", "component": "player:P02", "event_type": "GAME_OVER_RECEIVED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "winner": "P03", "is_winner": false, "is_draw": false, "score": {"P02": "even", "P03": "odd"}, "details": {"drawn_number": 9, "parity": "odd", "outcome": "PLAYER_B_WIN", "reason": "Player B chose 'odd', number was 9 (odd)"}}
+{"timestamp": "2025-12-24T20:42:38.398188Z", "component": "player:P02", "event_type": "PLAYER_INIT", "level": "INFO", "league_id": "league_2025_even_odd", "player_id": "P02"}
+{"timestamp": "2025-12-24T20:42:38.414480Z", "component": "player:P02", "event_type": "PLAYER_REGISTERED", "level": "INFO", "league_id": "league_2025_even_odd", "auth_token_received": true}
+{"timestamp": "2025-12-24T20:43:26.226210Z", "component": "player:P02", "event_type": "ROUND_NOTIFIED", "level": "INFO", "league_id": "league_2025_even_odd", "round_id": 1}
+{"timestamp": "2025-12-24T20:43:26.259329Z", "component": "player:P02", "event_type": "GAME_INVITATION_RECEIVED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "opponent_id": "P03"}
+{"timestamp": "2025-12-24T20:43:26.263599Z", "component": "player:P02", "event_type": "PARITY_CHOICE_MADE", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "choice": "even"}
+{"timestamp": "2025-12-24T20:43:26.267343Z", "component": "player:P02", "event_type": "GAME_OVER_RECEIVED", "level": "INFO", "league_id": "league_2025_even_odd", "match_id": "R1M2", "winner": "P02", "is_winner": true, "is_draw": false, "score": {"P02": "even", "P03": "odd"}, "details": {"drawn_number": 4, "parity": "even", "outcome": "PLAYER_A_WIN", "reason": "Player A chose 'even', number was 4 (even)"}}

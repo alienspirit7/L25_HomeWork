@@ -173,9 +173,11 @@ class RefereeHandlers:
             "sender": f"referee:{self.referee.referee_id}",
             "auth_token": self.referee.auth_token,
             "timestamp": get_iso_timestamp(),
+            "conversation_id": generate_conversation_id(f"report-{match_id}"),
             "league_id": self.referee.league_id,
-            "match_id": match_id,
             "round_id": round_id,
+            "match_id": match_id,
+            "game_type": "even_odd",
             "result": result
         }
         
@@ -188,44 +190,85 @@ class RefereeHandlers:
         player_id: str, opponent_id: str
     ) -> dict:
         """Create GAME_INVITATION message."""
+        # Determine role based on player position (simple heuristic)
+        # In practice, this should be passed as parameter
+        role_in_match = "PLAYER_A"  # Could be determined by match setup
+        
         return {
             "protocol": "league.v2",
             "message_type": "GAME_INVITATION",
             "sender": f"referee:{self.referee.referee_id}",
             "timestamp": get_iso_timestamp(),
+            "conversation_id": generate_conversation_id(f"invite-{match_id}-{player_id}"),
+            "auth_token": self.referee.auth_token,
             "league_id": self.referee.league_id,
-            "match_id": match_id,
             "round_id": round_id,
-            "player_id": player_id,
-            "opponent_id": opponent_id,
-            "game_type": "even_odd"
+            "match_id": match_id,
+            "game_type": "even_odd",
+            "role_in_match": role_in_match,
+            "opponent_id": opponent_id
         }
     
     def _create_parity_call(self, match_id: str, player_id: str) -> dict:
         """Create CHOOSE_PARITY_CALL message."""
+        from datetime import datetime, timedelta
+        
+        # Calculate deadline (30 seconds from now as per spec timeout)
+        deadline = datetime.utcnow() + timedelta(seconds=30)
+        deadline_str = deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+        
         return {
             "protocol": "league.v2",
             "message_type": "CHOOSE_PARITY_CALL",
             "sender": f"referee:{self.referee.referee_id}",
             "timestamp": get_iso_timestamp(),
+            "conversation_id": generate_conversation_id(f"parity-{match_id}-{player_id}"),
+            "auth_token": self.referee.auth_token,
             "league_id": self.referee.league_id,
             "match_id": match_id,
-            "player_id": player_id
+            "player_id": player_id,
+            "game_type": "even_odd",
+            "context": {
+                "opponent_id": "",  # Should be passed as parameter
+                "round_id": 0,  # Should be passed as parameter
+                "your_standings": {
+                    "wins": 0,
+                    "losses": 0,
+                    "draws": 0
+                }
+            },
+            "deadline": deadline_str
         }
     
     def _create_game_over(
         self, match_id: str, player_id: str, result: dict
     ) -> dict:
-        """Create GAME_OVER message."""
+        """Create GAME_OVER message matching specification."""
+        details = result.get('details', {})
+        winner = result.get('winner')
+        
+        # Determine status
+        if winner is None:
+            status = "DRAW"
+        else:
+            status = "WIN"
+        
         return {
             "protocol": "league.v2",
             "message_type": "GAME_OVER",
             "sender": f"referee:{self.referee.referee_id}",
             "timestamp": get_iso_timestamp(),
-            "league_id": self.referee.league_id,
+            "conversation_id": generate_conversation_id(f"game-over-{match_id}"),
+            "auth_token": self.referee.auth_token,
             "match_id": match_id,
-            "player_id": player_id,
-            "winner": result['winner'],
-            "score": result['score'],
-            "details": result.get('details', {})
+            "game_type": "even_odd",
+            "game_result": {
+                "status": status,
+                "winner_player_id": winner if winner else None,
+                "drawn_number": details.get('drawn_number'),
+                "number_parity": details.get('parity'),
+                "choices": details.get('choices', {}),
+                "reason": details.get('reason', '')
+            }
         }
+

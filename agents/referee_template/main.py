@@ -15,13 +15,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from league_sdk import ConfigLoader, JsonLogger
 from league_sdk.mcp_server import MCPServer
-from league_sdk.game_rules.even_odd import EvenOddGame
+from league_sdk.mcp_client import MCPClient
+from league_sdk.game_rules.even_odd import EvenOddRules
+from handlers import RefereeHandlers
 
 
 class RefereeAgent:
     """Referee Agent for managing matches using modular architecture."""
     
-    def __init__(self, referee_id: str, league_id: str):
+    def __init__(self, referee_id: str, league_id: str, league_manager_url: str, port: int):
         """Initialize referee with SDK configuration."""
         # Load configuration
         config_loader = ConfigLoader()
@@ -30,32 +32,69 @@ class RefereeAgent:
         
         self.referee_id = referee_id
         self.league_id = league_id
+        self.league_manager_url = league_manager_url
+        self.port = port
+        self.auth_token = None
         
         # Initialize logging  
         self.logger = JsonLogger(f"referee:{referee_id}", league_id=league_id)
         self.logger.info("REFEREE_INIT", referee_id=referee_id)
         
         # Game logic
-        self.game = EvenOddGame()
+        self.game = EvenOddRules()
         
-        # MCP Server
+        # MCP components
         self.mcp_server = MCPServer(f"Referee-{referee_id}")
+        self.mcp_client = MCPClient()
+        
+        # Initialize handlers with match execution logic
+        self.handlers = RefereeHandlers(self)
         self._setup_tools()
+        
+        # Store league manager endpoint for result reporting
+        self.league_manager_endpoint = league_manager_url
         
         logging.info(f"Referee {referee_id} initialized")
     
     def _setup_tools(self):
         """Register MCP tools."""
-        self.mcp_server.register_tool("start_match", self.start_match)
-        # Additional tools would be defined in handlers.py
+        # Use handler's start_match which has full match execution logic
+        self.mcp_server.register_tool("start_match", self.handlers.start_match)
+
     
-    async def start_match(self, args: dict) -> dict:
-        """Start a match - simplified example."""
-        match_id = args.get('match_id')
-        self.logger.info("MATCH_STARTED", match_id=match_id)
-        
-        # Match logic would be in handlers.py
-        return {"status": "STARTED", "match_id": match_id}
+    async def register_with_league(self):
+        """Register this referee with the league manager."""
+        try:
+            import json
+            referee_meta = {
+                "display_name": f"Referee-{self.referee_id}",
+                "version": "2.1.0",
+                "game_types": ["even_odd"],
+                "contact_endpoint": f"http://localhost:{self.port}/mcp",
+                "max_concurrent_matches": 1
+            }
+            
+            response = await self.mcp_client.call_tool(
+                self.league_manager_url,
+                "register_referee",
+                {"referee_meta": referee_meta}
+)
+            
+            # Parse MCP response wrapper
+            if 'content' in response and len(response['content']) > 0:
+                result_text = response['content'][0].get('text', '{}')
+                result = json.loads(result_text)
+            else:
+                result = response
+            
+            if result.get("status") == "ACCEPTED":
+                self.auth_token = result.get("auth_token")
+                logging.info(f"Referee {self.referee_id} registered successfully")
+                self.logger.info("REFEREE_REGISTERED", auth_token_received=bool(self.auth_token))
+            else:
+                logging.error(f"Referee registration failed: {result}")
+        except Exception as e:
+            logging.error(f"Error registering referee: {e}")
 
 
 async def main():
@@ -64,11 +103,15 @@ async def main():
     parser.add_argument("--referee-id", required=True)
     parser.add_argument("--league-id", default="league_2025_even_odd")
     parser.add_argument("--port", type=int, default=8001)
+    parser.add_argument("--league-manager", required=True, help="League manager MCP endpoint URL")
     args = parser.parse_args()
     
     logging.basicConfig(level=logging.INFO)
     
-    referee = RefereeAgent(args.referee_id, args.league_id)
+    referee = RefereeAgent(args.referee_id, args.league_id, args.league_manager, args.port)
+    
+    # Register with league manager
+    await referee.register_with_league()
     
     # Start MCP server
     import uvicorn
